@@ -4,7 +4,7 @@ import ARD.Vector3
 
 data Ray
   = Ray
-  { origin :: Vector3
+  { origin :: Point3
   , direction :: Vector3
   }
 
