@@ -8,14 +8,6 @@ import ARD.TestHelper
 import Test.Hspec
 import Test.QuickCheck
 
-hasHitPoint :: Plane -> Ray -> Point3 -> Expectation
-hasHitPoint plane ray hitPoint =
-  case hit plane ray of
-    Just hitResult ->
-      let shadeRec = shadeRecord hitResult
-      in (localHitPoint shadeRec) `shouldBe` hitPoint
-    _ -> expectationFailure "No hit point found"
-
 spec :: Spec
 spec = describe "Plane" $ do
   it "hit point" $

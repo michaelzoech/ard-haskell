@@ -26,6 +26,9 @@ minus (Vector3 x y z) (Vector3 x' y' z') = Vector3 (x-x') (y-y') (z-z')
 multiply :: Vector3 -> Double -> Vector3
 multiply (Vector3 x y z) d = Vector3 (x*d) (y*d) (z*d)
 
+divide :: Vector3 -> Double -> Vector3
+divide (Vector3 x y z) d = Vector3 (x/d) (y/d) (z/d)
+
 dot :: Vector3 -> Vector3 -> Double
 dot (Vector3 x y z) (Vector3 x' y' z') = x*x' + y*y' + z*z'
 

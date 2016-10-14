@@ -2,6 +2,9 @@
 
 module ARD.TestHelper where
 
+import qualified ARD.Geometric as Geometric
+import qualified ARD.Plane as Plane
+import qualified ARD.Ray as Ray
 import qualified ARD.Vector3 as Vector3
 import Control.Monad (unless)
 import Test.QuickCheck
@@ -30,4 +33,12 @@ expectTrue message actual = unless actual (expectationFailure message)
 -- @actual \`shouldBeClose\` expected@ sets the expectation that @actual@ is equal with some tolerance to @expected@.
 shouldBeClose :: (Show a, TolerantEqual a) => a -> a -> Expectation
 actual `shouldBeClose` expected = expectTrue ("expected: " ++ show expected ++ "\n but got: " ++ show actual) (actual =~ expected)
+
+hasHitPoint :: (Geometric.GeometricObject a) => a -> Ray.Ray -> Vector3.Point3 -> Expectation
+hasHitPoint obj ray hitPoint =
+  case Geometric.hit obj ray of
+    Just hitResult ->
+      let shadeRec = Geometric.shadeRecord hitResult
+      in (Geometric.localHitPoint shadeRec) `shouldBe` hitPoint
+    _ -> expectationFailure "No hit point found"
 
