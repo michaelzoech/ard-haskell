@@ -22,8 +22,11 @@ library
                       ARD.Plane,
                       ARD.Ray,
                       ARD.Sphere,
+                      ARD.Tracer,
                       ARD.Vector2,
-                      ARD.Vector3
+                      ARD.Vector3,
+                      ARD.ViewPlane,
+                      ARD.World
   default-language:   Haskell2010
 
 executable ard
