@@ -1,5 +1,6 @@
 module ARD.Plane where
 
+import ARD.Color
 import qualified ARD.Geometric as G
 import ARD.Ray as Ray
 import ARD.Vector3
@@ -25,7 +26,7 @@ instance G.GeometricObject Plane where
            , G.shadeRecord = G.ShadeRecord
              { G.localHitPoint = o `plus` (d `multiply` t)
              , G.normal = n
-             , G.color = G.RGBColor 1.0 1.0 1.0
+             , G.color = RGB 1.0 1.0 1.0
              }
            }
          else Nothing

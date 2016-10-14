@@ -1,5 +1,6 @@
 module ARD.Sphere where
 
+import ARD.Color
 import qualified ARD.Geometric as G
 import qualified ARD.Ray as Ray
 import ARD.Vector3
@@ -38,7 +39,7 @@ instance G.GeometricObject Sphere where
               , G.shadeRecord = G.ShadeRecord
                   { G.normal = (v `plus` (d `multiply` t)) `divide` r
                   , G.localHitPoint = o `plus` (d `multiply` t)
-                  , G.color = G.RGBColor 1.0 1.0 1.0
+                  , G.color = RGB 1.0 1.0 1.0
                   }
               }
         in

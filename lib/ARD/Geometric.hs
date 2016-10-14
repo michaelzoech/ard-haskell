@@ -1,5 +1,6 @@
 module ARD.Geometric where
 
+import ARD.Color
 import ARD.Ray
 import ARD.Vector3
 
@@ -9,14 +10,11 @@ data HitResult = HitResult
   }
   deriving (Eq, Show)
 
-data RGBColor = RGBColor Double Double Double
-  deriving (Eq, Show)
-
 data ShadeRecord
   = ShadeRecord
   { localHitPoint :: Point3
   , normal :: Normal3
-  , color :: RGBColor
+  , color :: Color
   }
   deriving (Eq, Show)
 

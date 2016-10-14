@@ -2,6 +2,7 @@ module ARD.Bitmap
   ( writeBitmapToFile
   ) where
 
+import ARD.Color
 import Data.Bits
 import Data.Word
 import System.IO
@@ -73,11 +74,11 @@ neededRowPadding width = (4 - (width `mod` 4)) `mod` 4
 
 encodePixelData [] _ = []
 encodePixelData pixels width =
-  let rowPixels = concat $ map (take 3 . encode) $ take width pixels
+  let rowPixels = concat $ map (take 3 . encode . encodeColorToRGBWord32) $ take width pixels
       padding = take (neededRowPadding $ length rowPixels) [0,0,0,0]
   in rowPixels ++ padding ++ encodePixelData (drop width pixels) width
 
-writeBitmapToFile :: Int -> Int -> [Word32] -> FilePath -> IO ()
+writeBitmapToFile :: Int -> Int -> [Color] -> FilePath -> IO ()
 writeBitmapToFile width height pixels filepath =
   do handle <- openFile filepath WriteMode
      L.hPut handle $ L.pack $ encode fileHeader
