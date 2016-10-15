@@ -9,6 +9,7 @@ data Sphere
   = Sphere
   { center :: Point3
   , radius :: Double
+  , color :: Color
   }
 
 instance G.GeometricObject Sphere where
@@ -39,7 +40,7 @@ instance G.GeometricObject Sphere where
               , G.shadeRecord = G.ShadeRecord
                   { G.normal = (v `plus` (d `multiply` t)) `divide` r
                   , G.localHitPoint = o `plus` (d `multiply` t)
-                  , G.color = RGB 1.0 1.0 1.0
+                  , G.color = color sphere
                   }
               }
         in

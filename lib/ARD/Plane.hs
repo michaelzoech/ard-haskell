@@ -9,6 +9,7 @@ data Plane
   = Plane
   { point :: Point3
   , normal :: Normal3
+  , color :: Color
   }
 
 kEpsilon = 1.0e-8
@@ -26,7 +27,7 @@ instance G.GeometricObject Plane where
            , G.shadeRecord = G.ShadeRecord
              { G.localHitPoint = o `plus` (d `multiply` t)
              , G.normal = n
-             , G.color = RGB 1.0 1.0 1.0
+             , G.color = color plane
              }
            }
          else Nothing

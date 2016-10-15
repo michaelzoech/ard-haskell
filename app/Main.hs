@@ -21,8 +21,9 @@ main =
         , pixelSize = 0.5
         }
       , sceneObjects =
-        [ SceneObject $ Sphere (Vector3 (-100) 0 0) 50
-        , SceneObject $ Sphere (Vector3 100 0 0) 85
+        [ SceneObject $ Sphere (Vector3 (-100) 0 0) 40 (RGB 1 0 0)
+        , SceneObject $ Sphere (Vector3 0 0 0) 40 (RGB 0 1 0)
+        , SceneObject $ Sphere (Vector3 100 0 0) 40 (RGB 0 0 1)
         ] :: [SceneObject]
       , backgroundColor = RGB 0 0 0
       }
