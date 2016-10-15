@@ -27,6 +27,6 @@ main =
         ] :: [SceneObject]
       , backgroundColor = RGB 0 0 0
       }
-    pixels = traceScene world
+    pixels = [ clampColor c | c <- traceScene world ]
   in writeBitmapToFile width height pixels "out.bmp"
 
