@@ -2,6 +2,7 @@
 
 module ARD.TestHelper where
 
+import qualified ARD.Color as Color
 import qualified ARD.Geometric as Geometric
 import qualified ARD.Plane as Plane
 import qualified ARD.Ray as Ray
@@ -17,6 +18,13 @@ instance Arbitrary Vector3.Vector3 where
     z <- arbitrary
     return $ Vector3.Vector3 x y z
 
+instance Arbitrary Color.Color where
+  arbitrary = do
+    r <- arbitrary
+    g <- arbitrary
+    b <- arbitrary
+    return $ Color.RGB r g b
+
 class TolerantEqual a where
   (=~) :: a -> a -> Bool
 
@@ -25,6 +33,9 @@ class TolerantEqual a where
 -- See https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 instance TolerantEqual Double where
   (=~) x y = abs (x-y) < (1.0e-8 :: Double)
+
+instance TolerantEqual Color.Color where
+  (=~) (Color.RGB r g b) (Color.RGB r' g' b') = (r =~ r') && (g =~ g') && (b =~ b')
 
 expectTrue :: String -> Bool -> Expectation
 expectTrue message actual = unless actual (expectationFailure message)
