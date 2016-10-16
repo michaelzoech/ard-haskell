@@ -19,11 +19,14 @@ main =
         { horizontalResolution = width
         , verticalResolution = height
         , pixelSize = 0.5
+        , numSamples = 16
+        , subPixelGenerator = regularSampling
         }
       , sceneObjects =
         [ SceneObject $ Sphere (Vector3 (-100) 0 0) 40 (RGB 1 0 0)
         , SceneObject $ Sphere (Vector3 0 0 0) 40 (RGB 0 1 0)
         , SceneObject $ Sphere (Vector3 100 0 0) 40 (RGB 0 0 1)
+        , SceneObject $ Sphere (Vector3 0 0 (-10)) 200 (RGB 0.2 0.2 0.2)
         ] :: [SceneObject]
       , backgroundColor = RGB 0 0 0
       }

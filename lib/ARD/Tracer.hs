@@ -15,17 +15,22 @@ traceScene :: World -> [Color]
 traceScene world =
   let
     vp = viewPlane world
-    ps = pixelSize vp
     width = horizontalResolution vp
     height = verticalResolution vp
-    resX = (fromIntegral width) :: Double
-    resY = (fromIntegral height) :: Double
     xy = [ (fromIntegral x, fromIntegral y) | y <- [0..height-1], x <- [0..width-1] ]
-    pixelPos u total = ps * (u - 0.5 * (total - 1.0))
     direction = Vector3 0 0 (-1)
-    rays = [ Ray (Vector3 (pixelPos x resX) (pixelPos y resY) 100) direction | (x,y) <- xy ]
+    generateRays = map (\(x,y) -> Ray (Vector3 x y 100) direction)
+    raysPerPixel = [ generateRays $ (subPixelGenerator vp) vp x y | (x,y) <- xy ]
   in
-    map (traceRay world) rays
+    map (tracePixel world) raysPerPixel
+
+tracePixel :: World -> [Ray] -> Color
+tracePixel world rays =
+  let
+    color = sum $ map (traceRay world) rays
+    numRays = fromIntegral $ Prelude.length rays
+  in
+    color `forChannels` (/ numRays)
 
 traceRay :: World -> Ray -> Color
 traceRay world ray
