@@ -21,6 +21,7 @@ library
                       ARD.Geometric,
                       ARD.Plane,
                       ARD.Ray,
+                      ARD.Sampler,
                       ARD.Sphere,
                       ARD.Tracer,
                       ARD.Vector2,

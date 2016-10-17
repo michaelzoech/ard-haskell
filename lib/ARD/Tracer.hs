@@ -5,6 +5,8 @@ module ARD.Tracer
 import ARD.Color
 import ARD.Geometric as G
 import ARD.Ray
+import ARD.Sampler
+import ARD.Vector2
 import ARD.Vector3
 import ARD.ViewPlane
 import ARD.World
@@ -17,10 +19,15 @@ traceScene world =
     vp = viewPlane world
     width = horizontalResolution vp
     height = verticalResolution vp
+    resX = fromIntegral width
+    resY = fromIntegral height
+    ps = pixelSize vp
+    samples = unitSquareSamples $ pixelSampler vp
     xy = [ (fromIntegral x, fromIntegral y) | y <- [0..height-1], x <- [0..width-1] ]
     direction = Vector3 0 0 (-1)
-    generateRays = map (\(x,y) -> Ray (Vector3 x y 100) direction)
-    raysPerPixel = [ generateRays $ (subPixelGenerator vp) vp x y | (x,y) <- xy ]
+    raysPerPixel = [ generateRays samples x y | (x,y) <- xy ]
+    pixelPos u v total = ps * ((fromIntegral u) - 0.5 * total + v)
+    generateRays samples x y = map (\(Vector2 x' y') -> Ray (Vector3 (pixelPos x x' resX) (pixelPos y y' resY) 100) direction) samples
   in
     map (tracePixel world) raysPerPixel
 
