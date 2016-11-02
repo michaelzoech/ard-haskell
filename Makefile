@@ -1,17 +1,17 @@
 
 .PHONY: all
 all:
-	cabal build
+	stack build
 
 .PHONY: test
 test:
-	cabal test --show-details=always --test-option=--color
+	stack test
 
 .PHONY: run
 run:
-	cabal run
+	stack exec ard
 
 .PHONY: clean
 clean:
-	cabal clean
+	stack clean
 
