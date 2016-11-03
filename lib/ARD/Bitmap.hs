@@ -37,14 +37,14 @@ class Encodeable a where
 
 instance Encodeable Word16 where
   encode value = map fromIntegral [ value .&. 0xff
-                                  , (shiftR value 8) .&. 0xff
+                                  , shiftR value 8 .&. 0xff
                                   ]
 
 instance Encodeable Word32 where
   encode value = map fromIntegral [ value .&. 0xff
-                                  , (shiftR value 8) .&. 0xff
-                                  , (shiftR value 16) .&. 0xff
-                                  , (shiftR value 24) .&. 0xff
+                                  , shiftR value 8 .&. 0xff
+                                  , shiftR value 16 .&. 0xff
+                                  , shiftR value 24 .&. 0xff
                                   ]
 
 instance Encodeable BitmapFileHeader where
@@ -74,7 +74,7 @@ neededRowPadding width = (4 - (width `mod` 4)) `mod` 4
 
 encodePixelData [] _ = []
 encodePixelData pixels width =
-  let rowPixels = concat $ map (take 3 . encode . encodeColorToRGBWord32) $ take width pixels
+  let rowPixels = concatMap (take 3 . encode . encodeColorToRGBWord32) $ take width pixels
       padding = take (neededRowPadding $ length rowPixels) [0,0,0,0]
   in rowPixels ++ padding ++ encodePixelData (drop width pixels) width
 

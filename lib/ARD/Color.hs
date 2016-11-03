@@ -15,8 +15,8 @@ instance Num Color where
   signum c = c `forChannels` signum
   fromInteger i =
     let
-      i' = (fromInteger i) :: Word32
-      b = fromInteger $ toInteger $ (0xff .&. i')
+      i' = fromInteger i :: Word32
+      b = fromInteger $ toInteger (0xff .&. i')
       g = fromInteger $ toInteger $ (0xff00 .&. i') `shiftR` 8
       r = fromInteger $ toInteger $ (0xff0000 .&. i') `shiftR` 16
     in
@@ -36,7 +36,7 @@ encodeColorToRGBWord32 (RGB r g b) =
 
 -- | Clamp Color to the standard boundaries.
 clampColor :: Color -> Color
-clampColor c = c `forChannels` (\d -> min 1 (max 0 d))
+clampColor c = c `forChannels` (min 1 . max 0 )
 
 -- | Modify each channel by applying the given function.
 forChannels :: Color -> (Double -> Double) -> Color

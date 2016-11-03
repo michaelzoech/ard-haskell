@@ -35,7 +35,7 @@ instance G.GeometricObject Sphere where
           t = (-b - e) / denom
           t' = (-b + e) / denom
           hitResult t =
-            Just $ G.HitResult
+            Just G.HitResult
               { G.tmin = t
               , G.shadeRecord = G.ShadeRecord
                   { G.normal = (v `plus` (d `multiply` t)) `divide` r
