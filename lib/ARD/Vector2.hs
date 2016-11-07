@@ -33,9 +33,9 @@ lengthSquared (Vector2 x y) = x*x + y*y
 length :: Vector2 -> Double
 length v = sqrt $ lengthSquared v
 
-multiply :: Vector2 -> Double -> Vector2
-multiply (Vector2 x y) d = Vector2 (x*d) (y*d)
+mul :: Vector2 -> Double -> Vector2
+mul (Vector2 x y) d = Vector2 (x*d) (y*d)
 
 normalize :: Vector2 -> Vector2
-normalize v = v `multiply` (1.0 / length v)
+normalize v = v `mul` (1.0 / length v)
 

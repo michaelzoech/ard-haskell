@@ -25,7 +25,7 @@ instance G.GeometricObject Plane where
          then Just G.HitResult
            { G.tmin = t
            , G.shadeRecord = G.ShadeRecord
-             { G.localHitPoint = o + (d `multiply` t)
+             { G.localHitPoint = o + (d `mul` t)
              , G.normal = n
              , G.color = color plane
              }

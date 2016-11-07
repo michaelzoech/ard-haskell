@@ -21,7 +21,7 @@ instance Camera OrthographicCamera where
       eye = orthographicEye camera
       lookAt = orthographicLookAt camera
       (u,v,w) = orthographicUVW camera
-      origin = eye + (u `Vector3.multiply` x) + (v `Vector3.multiply` y)
+      origin = eye + (u `Vector3.mul` x) + (v `Vector3.mul` y)
       direction = lookAt - eye
     in
       Ray origin direction
@@ -50,7 +50,7 @@ instance Camera PinholeCamera where
       eye = pinholeEye camera
       distance = pinholeViewPlaneDistance camera
       (u,v,w) = pinholeUVW camera
-      direction = (u `Vector3.multiply` x) + (v `Vector3.multiply` y) - (w `Vector3.multiply` distance)
+      direction = (u `Vector3.mul` x) + (v `Vector3.mul` y) - (w `Vector3.mul` distance)
     in
       Ray eye (Vector3.normalize direction)
 

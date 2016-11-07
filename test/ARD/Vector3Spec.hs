@@ -15,7 +15,7 @@ spec = describe "Vector3" $ do
   it "v minus v == 0" $ property $
     \v -> v - v == Vector3 0 0 0
   it "v plus v == 2v" $ property
-    (\v -> v + v == v `multiply` 2)
+    (\v -> v + v == v `mul` 2)
   it "dot product of perpendicular vectors is 0" $ property $
     \d -> Vector3 d 0 0 `dot` Vector3 0 d 0 == 0
   it "dot product of same vector is 1" $ property $
