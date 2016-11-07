@@ -29,7 +29,7 @@ instance Camera OrthographicCamera where
 makeOrthographicCamera :: Vector3 -> Vector3 -> Vector3 -> OrthographicCamera
 makeOrthographicCamera eye lookAt up =
   let
-    w = Vector3.normalize (eye `Vector3.minus` up)
+    w = Vector3.normalize (eye `Vector3.minus` lookAt)
     u = Vector3.normalize (up `Vector3.cross` w)
     v = w `Vector3.cross` u
   in
@@ -38,5 +38,39 @@ makeOrthographicCamera eye lookAt up =
     , orthographicLookAt = lookAt
     , orthographicUp = Vector3.normalize up
     , orthographicUVW = (u,v,w)
+    }
+
+data PinholeCamera
+  = PinholeCamera
+  { pinholeEye :: Vector3
+  , pinholeLookAt :: Vector3
+  , pinholeUp :: Vector3
+  , pinholeUVW :: (Vector3, Vector3, Vector3)
+  , pinholeViewPlaneDistance :: Double
+  }
+
+instance Camera PinholeCamera where
+  generateRay camera (Vector2 x y) =
+    let
+      eye = pinholeEye camera
+      distance = pinholeViewPlaneDistance camera
+      (u,v,w) = pinholeUVW camera
+      direction = (u `Vector3.multiply` x) `Vector3.plus` (v `Vector3.multiply` y) `Vector3.minus` (w `Vector3.multiply` distance)
+    in
+      Ray eye (Vector3.normalize direction)
+
+makePinholeCamera :: Vector3 -> Vector3 -> Vector3 -> Double -> PinholeCamera
+makePinholeCamera eye lookAt up d =
+  let
+    w = Vector3.normalize (eye `Vector3.minus` lookAt)
+    u = Vector3.normalize (up `Vector3.cross` w)
+    v = w `Vector3.cross` u
+  in
+    PinholeCamera
+    { pinholeEye = eye
+    , pinholeLookAt = lookAt
+    , pinholeUp = up
+    , pinholeUVW = (u,v,w)
+    , pinholeViewPlaneDistance = d
     }
 

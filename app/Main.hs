@@ -16,19 +16,29 @@ main =
   let
     width = 800
     height = 600
+    red = RGB 1 0 0
+    green = RGB 0 1 0
+    blue = RGB 0 0 1
+    darkGray = RGB 0.2 0.2 0.2
     world = World
-      { camera = SceneCamera $ makeOrthographicCamera (Vector3 100 50 100) (Vector3 0 0 0) (Vector3 0 1 0)
+      { camera = SceneCamera $ makePinholeCamera (Vector3 0 0 400) (Vector3 0 0 0) (Vector3 0 1 0) 400
       , viewPlane = ViewPlane
         { horizontalResolution = width
         , verticalResolution = height
-        , pixelSize = 1
+        , pixelSize = 0.5
         , pixelSampler = genRegularSampler 16
         }
       , sceneObjects =
-        [ SceneObject $ Sphere (Vector3 (-100) 0 0) 40 (RGB 1 0 0)
-        , SceneObject $ Sphere (Vector3 0 0 0) 40 (RGB 0 1 0)
-        , SceneObject $ Sphere (Vector3 100 0 0) 40 (RGB 0 0 1)
-        , SceneObject $ Sphere (Vector3 0 0 (-200)) 150 (RGB 0.2 0.2 0.2)
+        [ SceneObject $ Sphere (Vector3 (-100) 0 0) 40 red
+        , SceneObject $ Sphere (Vector3 0 0 0) 40 green
+        , SceneObject $ Sphere (Vector3 100 0 0) 40 blue
+        , SceneObject $ Sphere (Vector3 (-100) 0 (-100)) 40 red
+        , SceneObject $ Sphere (Vector3 0 0 (-100)) 40 green
+        , SceneObject $ Sphere (Vector3 100 0 (-100)) 40 blue
+        , SceneObject $ Sphere (Vector3 (-100) 0 (-200)) 40 red
+        , SceneObject $ Sphere (Vector3 0 0 (-200)) 40 green
+        , SceneObject $ Sphere (Vector3 100 0 (-200)) 40 blue
+        , SceneObject $ Sphere (Vector3 0 0 (-350)) 100 darkGray
         ] :: [SceneObject]
       , backgroundColor = RGB 0 0 0
       }
