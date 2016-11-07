@@ -11,11 +11,11 @@ spec = describe "Vector3" $ do
   it "unit vector has length 1.0" $
     Vector3.length (Vector3 1.0 0.0 0.0) `shouldBe` 1.0
   it "plus example" $
-    Vector3 1 2 3 `plus` Vector3 11 12 13 == Vector3 12 14 16
+    Vector3 1 2 3 + Vector3 11 12 13 == Vector3 12 14 16
   it "v minus v == 0" $ property $
-    \v -> v `minus` v == Vector3 0 0 0
+    \v -> v - v == Vector3 0 0 0
   it "v plus v == 2v" $ property
-    (\v -> v `plus` v == v `multiply` 2)
+    (\v -> v + v == v `multiply` 2)
   it "dot product of perpendicular vectors is 0" $ property $
     \d -> Vector3 d 0 0 `dot` Vector3 0 d 0 == 0
   it "dot product of same vector is 1" $ property $

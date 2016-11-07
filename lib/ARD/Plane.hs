@@ -20,12 +20,12 @@ instance G.GeometricObject Plane where
         n = normal plane
         o = Ray.origin ray
         d = Ray.direction ray
-        t = (p `minus` o) `dot` n / (d `dot` n)
+        t = (p - o) `dot` n / (d `dot` n)
     in if t > kEpsilon
          then Just G.HitResult
            { G.tmin = t
            , G.shadeRecord = G.ShadeRecord
-             { G.localHitPoint = o `plus` (d `multiply` t)
+             { G.localHitPoint = o + (d `multiply` t)
              , G.normal = n
              , G.color = color plane
              }

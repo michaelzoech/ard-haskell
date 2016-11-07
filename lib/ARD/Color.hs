@@ -10,6 +10,7 @@ data Color
 instance Num Color where
   (+) (RGB r g b) (RGB r' g' b') = RGB (r+r') (g+g') (b+b')
   (*) (RGB r g b) (RGB r' g' b') = RGB (r*r') (g*g') (b*b')
+  (-) (RGB r g b) (RGB r' g' b') = RGB (r-r') (g-g') (b-b')
   negate c = c `forChannels` negate
   abs c = c `forChannels` abs
   signum c = c `forChannels` signum

@@ -19,7 +19,7 @@ instance G.GeometricObject Sphere where
       d = Ray.direction ray
       s = center sphere
       r = radius sphere
-      v = o `minus` s
+      v = o - s
       a = d `dot` d
       b = v `multiply` 2 `dot` d
       c = v `dot` v - r * r
@@ -38,8 +38,8 @@ instance G.GeometricObject Sphere where
             Just G.HitResult
               { G.tmin = t
               , G.shadeRecord = G.ShadeRecord
-                  { G.normal = (v `plus` (d `multiply` t)) `divide` r
-                  , G.localHitPoint = o `plus` (d `multiply` t)
+                  { G.normal = (v + (d `multiply` t)) `divide` r
+                  , G.localHitPoint = o + (d `multiply` t)
                   , G.color = color sphere
                   }
               }

@@ -21,8 +21,8 @@ instance Camera OrthographicCamera where
       eye = orthographicEye camera
       lookAt = orthographicLookAt camera
       (u,v,w) = orthographicUVW camera
-      origin = eye `Vector3.plus` (u `Vector3.multiply` x) `Vector3.plus` (v `Vector3.multiply` y)
-      direction = lookAt `Vector3.minus` eye
+      origin = eye + (u `Vector3.multiply` x) + (v `Vector3.multiply` y)
+      direction = lookAt - eye
     in
       Ray origin direction
 
@@ -50,7 +50,7 @@ instance Camera PinholeCamera where
       eye = pinholeEye camera
       distance = pinholeViewPlaneDistance camera
       (u,v,w) = pinholeUVW camera
-      direction = (u `Vector3.multiply` x) `Vector3.plus` (v `Vector3.multiply` y) `Vector3.minus` (w `Vector3.multiply` distance)
+      direction = (u `Vector3.multiply` x) + (v `Vector3.multiply` y) - (w `Vector3.multiply` distance)
     in
       Ray eye (Vector3.normalize direction)
 
@@ -67,7 +67,7 @@ makePinholeCamera eye lookAt up d =
 calculateUVW :: Vector3 -> Vector3 -> Vector3 -> (Vector3, Vector3, Vector3)
 calculateUVW eye lookAt up =
   let
-    w = Vector3.normalize (eye `Vector3.minus` lookAt)
+    w = Vector3.normalize (eye - lookAt)
     u = Vector3.normalize (up `Vector3.cross` w)
     v = w `Vector3.cross` u
   in
