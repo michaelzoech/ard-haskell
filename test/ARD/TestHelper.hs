@@ -6,10 +6,17 @@ import qualified ARD.Color as Color
 import qualified ARD.Geometric as Geometric
 import qualified ARD.Plane as Plane
 import qualified ARD.Ray as Ray
+import qualified ARD.Vector2 as Vector2
 import qualified ARD.Vector3 as Vector3
 import Control.Monad (unless)
 import Test.QuickCheck
 import Test.Hspec
+
+instance Arbitrary Vector2.Vector2 where
+  arbitrary = do
+    x <- arbitrary
+    y <- arbitrary
+    return $ Vector2.Vector2 x y
 
 instance Arbitrary Vector3.Vector3 where
   arbitrary = do
