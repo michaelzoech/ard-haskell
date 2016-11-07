@@ -11,12 +11,12 @@ import ARD.ViewPlane
 data SceneObject = forall a. GeometricObject a => SceneObject a
 
 instance GeometricObject SceneObject where
-  hit (SceneObject o) ray = hit o ray
+  hit (SceneObject o) = hit o
 
 data SceneCamera = forall a. Camera a => SceneCamera a
 
 instance Camera SceneCamera where
-  generateRay (SceneCamera camera) v = generateRay camera v
+  generateRay (SceneCamera camera) = generateRay camera
 
 data World
   = World

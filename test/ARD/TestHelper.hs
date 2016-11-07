@@ -4,7 +4,6 @@ module ARD.TestHelper where
 
 import qualified ARD.Color as Color
 import qualified ARD.Geometric as Geometric
-import qualified ARD.Plane as Plane
 import qualified ARD.Ray as Ray
 import qualified ARD.Vector2 as Vector2
 import qualified ARD.Vector3 as Vector3
@@ -56,7 +55,9 @@ hasHitPoint :: (Geometric.GeometricObject a) => a -> Ray.Ray -> Vector3.Point3 -
 hasHitPoint obj ray hitPoint =
   case Geometric.hit obj ray of
     Just hitResult ->
-      let shadeRec = Geometric.shadeRecord hitResult
-      in (Geometric.localHitPoint shadeRec) `shouldBe` hitPoint
+      let
+        shadeRec = Geometric.shadeRecord hitResult
+      in
+        Geometric.localHitPoint shadeRec `shouldBe` hitPoint
     _ -> expectationFailure "No hit point found"
 

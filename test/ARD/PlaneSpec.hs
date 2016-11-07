@@ -6,7 +6,6 @@ import ARD.Ray
 import ARD.Vector3
 import ARD.TestHelper
 import Test.Hspec
-import Test.QuickCheck
 
 spec :: Spec
 spec = describe "Plane" $ do
