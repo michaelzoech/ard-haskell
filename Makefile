@@ -1,7 +1,10 @@
 
-.PHONY: all
-all:
+.PHONY: compile
+compile:
 	stack build
+
+.PHONY: all
+all: compile run
 
 .PHONY: test
 test:

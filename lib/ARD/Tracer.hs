@@ -2,12 +2,13 @@ module ARD.Tracer
   ( traceScene
   ) where
 
+import ARD.Camera
 import ARD.Color
 import ARD.Geometric as G
 import ARD.Ray
 import ARD.Sampler
-import ARD.Vector2
-import ARD.Vector3
+import ARD.Vector2 as Vector2
+import ARD.Vector3 as Vector3
 import ARD.ViewPlane
 import ARD.World
 import Data.List (minimumBy)
@@ -16,6 +17,7 @@ import Data.Maybe (catMaybes, mapMaybe)
 traceScene :: World -> [Color]
 traceScene world =
   let
+    cam = camera world
     vp = viewPlane world
     width = horizontalResolution vp
     height = verticalResolution vp
@@ -27,7 +29,7 @@ traceScene world =
     direction = Vector3 0 0 (-1)
     raysPerPixel = [ generateRays samples x y | (x,y) <- xy ]
     pixelPos u v total = ps * (fromIntegral u - 0.5 * total + v)
-    generateRays samples x y = map (\(Vector2 x' y') -> Ray (Vector3 (pixelPos x x' resX) (pixelPos y y' resY) 100) direction) samples
+    generateRays samples x y = map (\(Vector2 x' y') -> generateRay cam (Vector2 (pixelPos x x' resX) (pixelPos y y' resY))) samples
   in
     map (tracePixel world) raysPerPixel
 
