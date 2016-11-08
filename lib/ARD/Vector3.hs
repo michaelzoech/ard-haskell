@@ -2,7 +2,7 @@ module ARD.Vector3 where
 
 import Prelude hiding (length)
 
-data Vector3 = Vector3 Double Double Double
+data Vector3 = Vector3 !Double !Double !Double
   deriving (Eq, Show)
 
 type Normal3 = Vector3
