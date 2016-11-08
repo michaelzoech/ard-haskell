@@ -4,7 +4,7 @@ import Prelude hiding (div)
 import ARD.Color
 import qualified ARD.Geometric as G
 import qualified ARD.Ray as Ray
-import ARD.Vector3
+import ARD.Vector
 
 data Sphere
   = Sphere

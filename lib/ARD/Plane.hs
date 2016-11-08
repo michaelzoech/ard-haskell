@@ -3,7 +3,7 @@ module ARD.Plane where
 import ARD.Color
 import qualified ARD.Geometric as G
 import ARD.Ray as Ray
-import ARD.Vector3
+import ARD.Vector
 
 data Plane
   = Plane

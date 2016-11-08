@@ -1,6 +1,6 @@
 module ARD.Ray where
 
-import ARD.Vector3
+import ARD.Vector
 
 data Ray
   = Ray

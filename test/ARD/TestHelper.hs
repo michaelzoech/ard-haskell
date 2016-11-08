@@ -5,24 +5,23 @@ module ARD.TestHelper where
 import qualified ARD.Color as Color
 import qualified ARD.Geometric as Geometric
 import qualified ARD.Ray as Ray
-import qualified ARD.Vector2 as Vector2
-import qualified ARD.Vector3 as Vector3
+import qualified ARD.Vector as Vector
 import Control.Monad (unless)
 import Test.QuickCheck
 import Test.Hspec
 
-instance Arbitrary Vector2.Vector2 where
+instance Arbitrary Vector.Vector2 where
   arbitrary = do
     x <- arbitrary
     y <- arbitrary
-    return $ Vector2.Vector2 x y
+    return $ Vector.Vector2 x y
 
-instance Arbitrary Vector3.Vector3 where
+instance Arbitrary Vector.Vector3 where
   arbitrary = do
     x <- arbitrary
     y <- arbitrary
     z <- arbitrary
-    return $ Vector3.Vector3 x y z
+    return $ Vector.Vector3 x y z
 
 instance Arbitrary Color.Color where
   arbitrary = do
@@ -51,7 +50,7 @@ expectTrue message actual = unless actual (expectationFailure message)
 shouldBeClose :: (Show a, TolerantEqual a) => a -> a -> Expectation
 actual `shouldBeClose` expected = expectTrue ("expected: " ++ show expected ++ "\n but got: " ++ show actual) (actual =~ expected)
 
-hasHitPoint :: (Geometric.GeometricObject a) => a -> Ray.Ray -> Vector3.Point3 -> Expectation
+hasHitPoint :: (Geometric.GeometricObject a) => a -> Ray.Ray -> Vector.Point3 -> Expectation
 hasHitPoint obj ray hitPoint =
   case Geometric.hit obj ray of
     Just hitResult ->

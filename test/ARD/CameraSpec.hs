@@ -1,9 +1,8 @@
 module ARD.CameraSpec where
 
 import ARD.Camera
-import ARD.Vector3
+import ARD.Vector
 
-import ARD.TestHelper
 import Test.Hspec
 
 spec :: Spec

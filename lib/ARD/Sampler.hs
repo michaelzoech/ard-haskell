@@ -1,6 +1,6 @@
 module ARD.Sampler where
 
-import ARD.Vector2
+import ARD.Vector
 
 data Sampler
   = Sampler

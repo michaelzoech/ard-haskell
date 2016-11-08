@@ -3,7 +3,7 @@ module ARD.ColorSpec where
 
 import ARD.Color as Color
 
-import ARD.TestHelper
+import ARD.TestHelper()
 import Test.Hspec
 import Test.QuickCheck
 

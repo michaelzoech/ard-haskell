@@ -1,7 +1,7 @@
 module ARD.SamplerSpec where
 
 import ARD.Sampler
-import ARD.Vector2
+import ARD.Vector
 import Test.Hspec
 
 spec :: Spec

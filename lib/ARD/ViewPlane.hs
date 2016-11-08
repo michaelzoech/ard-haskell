@@ -2,7 +2,7 @@ module ARD.ViewPlane where
 
 import ARD.Ray
 import ARD.Sampler
-import ARD.Vector3
+import ARD.Vector
 
 data ViewPlane
   = ViewPlane

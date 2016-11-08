@@ -4,7 +4,7 @@ import ARD.Color
 import ARD.Geometric
 import ARD.Ray
 import ARD.Sphere
-import ARD.Vector3
+import ARD.Vector
 
 import ARD.TestHelper
 import Test.Hspec

@@ -2,7 +2,7 @@ module ARD.Geometric where
 
 import ARD.Color
 import ARD.Ray
-import ARD.Vector3
+import ARD.Vector
 
 data HitResult = HitResult
   { tmin :: Double

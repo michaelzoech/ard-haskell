@@ -5,7 +5,7 @@ import ARD.Color
 import ARD.Sampler
 import ARD.Sphere
 import ARD.Tracer
-import ARD.Vector3
+import ARD.Vector
 import ARD.ViewPlane
 import ARD.World
 import Data.Word

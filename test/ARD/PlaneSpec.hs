@@ -3,7 +3,7 @@ module ARD.PlaneSpec where
 import ARD.Color
 import ARD.Plane
 import ARD.Ray
-import ARD.Vector3
+import ARD.Vector
 import ARD.TestHelper
 import Test.Hspec
 

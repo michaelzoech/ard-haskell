@@ -7,8 +7,7 @@ import ARD.Color
 import ARD.Geometric as G
 import ARD.Ray
 import ARD.Sampler
-import ARD.Vector2 as Vector2
-import ARD.Vector3 as Vector3
+import ARD.Vector as Vector
 import ARD.ViewPlane
 import ARD.World
 import Data.List (minimumBy)

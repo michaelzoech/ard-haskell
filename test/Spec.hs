@@ -5,8 +5,7 @@ import qualified ARD.ColorSpec
 import qualified ARD.PlaneSpec
 import qualified ARD.SamplerSpec
 import qualified ARD.SphereSpec
-import qualified ARD.Vector2Spec
-import qualified ARD.Vector3Spec
+import qualified ARD.VectorSpec
 
 main :: IO ()
 main = hspec $ do
@@ -15,6 +14,5 @@ main = hspec $ do
   ARD.PlaneSpec.spec
   ARD.SamplerSpec.spec
   ARD.SphereSpec.spec
-  ARD.Vector2Spec.spec
-  ARD.Vector3Spec.spec
+  ARD.VectorSpec.spec
 
