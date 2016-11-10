@@ -2,6 +2,7 @@
 import ARD.Bitmap
 import ARD.Camera
 import ARD.Color
+import ARD.Plane
 import ARD.Sampler
 import ARD.Sphere
 import ARD.Tracer
@@ -39,6 +40,7 @@ main =
         , SceneObject $ Sphere (Vector3 0 0 (-200)) 40 green
         , SceneObject $ Sphere (Vector3 100 0 (-200)) 40 blue
         , SceneObject $ Sphere (Vector3 0 0 (-350)) 100 darkGray
+        , SceneObject $ Plane (Vector3 0 (-100) 0) (Vector3 0 1 0) darkGray
         ] :: [SceneObject]
       , backgroundColor = RGB 0 0 0
       }
