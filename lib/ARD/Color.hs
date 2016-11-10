@@ -5,7 +5,7 @@ import Data.Bits
 import Data.Word
 
 data Color
-  = RGB Double Double Double
+  = RGB !Double !Double !Double
   deriving (Eq, Show)
 
 instance Num Color where
