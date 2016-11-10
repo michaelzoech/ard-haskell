@@ -1,5 +1,6 @@
 module ARD.Color where
 
+import Prelude hiding (div)
 import Data.Bits
 import Data.Word
 
@@ -24,7 +25,21 @@ instance Num Color where
       RGB (r / 255) (g / 255) (b / 255)
 
 mul :: Color -> Double -> Color
-mul (RGB r g b) d = RGB (r*d) (g*d) (b*d)
+mul c d = c `forChannels` (*d)
+
+div :: Color -> Double -> Color
+div c d = c `forChannels` (/d)
+
+-- | Map possible out of gamut color into 0.0-1.0 range
+maxToOne :: Color -> Color
+maxToOne c@(RGB r g b) =
+  let
+    maxValue = maximum [r, g, b]
+  in
+    if maxValue > 1 then
+      c `div` maxValue
+    else
+      c
 
 -- | Encode Color into Word32.
 -- The ordering of the channels from little to highest is BGR.
