@@ -28,6 +28,9 @@ main =
     greenMatte = Material.createMatte green 1 0.2
     blueMatte = Material.createMatte blue 1 0.2
     grayMatte = Material.createMatte gray 1 0.2
+    redPhong = Material.createPhong red 1 0.2 white 5
+    greenPhong = Material.createPhong green 1 0.2 white 20
+    bluePhong = Material.createPhong blue 1 0.2 white 150
     world = World
       { camera = SceneCamera $ makePinholeCamera (Vector3 0 100 400) (Vector3 0 20 (-120)) (Vector3 0 1 0) 450
       , viewPlane = ViewPlane
@@ -37,22 +40,22 @@ main =
         , pixelSampler = genRegularSampler 16
         }
       , sceneObjects =
-        [ SceneObject $ Sphere (Vector3 (-100) 0 0) 40 redMatte
-        , SceneObject $ Sphere (Vector3 0 0 0) 40 greenMatte
-        , SceneObject $ Sphere (Vector3 100 0 0) 40 blueMatte
+        [ SceneObject $ Sphere (Vector3 (-100) (-40) 0) 40 redPhong
+        , SceneObject $ Sphere (Vector3 0 (-40) 0) 40 greenPhong
+        , SceneObject $ Sphere (Vector3 100 (-40) 0) 40 bluePhong
         , SceneObject $ Sphere (Vector3 (-100) 0 (-100)) 40 redMatte
         , SceneObject $ Sphere (Vector3 0 0 (-100)) 40 greenMatte
         , SceneObject $ Sphere (Vector3 100 0 (-100)) 40 blueMatte
-        , SceneObject $ Sphere (Vector3 (-100) 0 (-200)) 40 redMatte
-        , SceneObject $ Sphere (Vector3 0 0 (-200)) 40 greenMatte
-        , SceneObject $ Sphere (Vector3 100 0 (-200)) 40 blueMatte
+        , SceneObject $ Sphere (Vector3 (-100) 40 (-200)) 40 redMatte
+        , SceneObject $ Sphere (Vector3 0 40 (-200)) 40 greenMatte
+        , SceneObject $ Sphere (Vector3 100 40 (-200)) 40 blueMatte
         , SceneObject $ Sphere (Vector3 0 0 (-350)) 100 grayMatte
         , SceneObject $ Plane (Vector3 0 (-100) 0) (Vector3 0 1 0) grayMatte
         ] :: [SceneObject]
       , lights =
-        [ Light.createPoint (Vector3 50 50 100) white 1.0
+        [ Light.createPoint (Vector3 70 50 100) white 1.0
         , Light.createPoint (Vector3 0 50 100) white 1.0
-        , Light.createPoint (Vector3 (-50) 50 100) white 1.0
+        , Light.createPoint (Vector3 (-70) 50 100) white 1.0
         ]
       , backgroundColor = RGB 0 0 0
       }
