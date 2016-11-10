@@ -2,6 +2,8 @@
 import ARD.Bitmap
 import ARD.Camera
 import ARD.Color
+import qualified ARD.Light as Light
+import qualified ARD.Material as Material
 import ARD.Plane
 import ARD.Sampler
 import ARD.Sphere
@@ -21,8 +23,13 @@ main =
     green = RGB 0 1 0
     blue = RGB 0 0 1
     darkGray = RGB 0.2 0.2 0.2
+    white = RGB 1 1 1
+    redMatte = Material.createMatte red 1 0.2
+    greenMatte = Material.createMatte green 1 0.2
+    blueMatte = Material.createMatte blue 1 0.2
+    darkGrayMatte = Material.createMatte darkGray 1 0.2
     world = World
-      { camera = SceneCamera $ makePinholeCamera (Vector3 0 0 400) (Vector3 0 0 0) (Vector3 0 1 0) 400
+      { camera = SceneCamera $ makePinholeCamera (Vector3 0 100 400) (Vector3 0 20 (-120)) (Vector3 0 1 0) 450
       , viewPlane = ViewPlane
         { horizontalResolution = width
         , verticalResolution = height
@@ -30,18 +37,22 @@ main =
         , pixelSampler = genRegularSampler 16
         }
       , sceneObjects =
-        [ SceneObject $ Sphere (Vector3 (-100) 0 0) 40 red
-        , SceneObject $ Sphere (Vector3 0 0 0) 40 green
-        , SceneObject $ Sphere (Vector3 100 0 0) 40 blue
-        , SceneObject $ Sphere (Vector3 (-100) 0 (-100)) 40 red
-        , SceneObject $ Sphere (Vector3 0 0 (-100)) 40 green
-        , SceneObject $ Sphere (Vector3 100 0 (-100)) 40 blue
-        , SceneObject $ Sphere (Vector3 (-100) 0 (-200)) 40 red
-        , SceneObject $ Sphere (Vector3 0 0 (-200)) 40 green
-        , SceneObject $ Sphere (Vector3 100 0 (-200)) 40 blue
-        , SceneObject $ Sphere (Vector3 0 0 (-350)) 100 darkGray
-        , SceneObject $ Plane (Vector3 0 (-100) 0) (Vector3 0 1 0) darkGray
+        [ SceneObject $ Sphere (Vector3 (-100) 0 0) 40 redMatte
+        , SceneObject $ Sphere (Vector3 0 0 0) 40 greenMatte
+        , SceneObject $ Sphere (Vector3 100 0 0) 40 blueMatte
+        , SceneObject $ Sphere (Vector3 (-100) 0 (-100)) 40 redMatte
+        , SceneObject $ Sphere (Vector3 0 0 (-100)) 40 greenMatte
+        , SceneObject $ Sphere (Vector3 100 0 (-100)) 40 blueMatte
+        , SceneObject $ Sphere (Vector3 (-100) 0 (-200)) 40 redMatte
+        , SceneObject $ Sphere (Vector3 0 0 (-200)) 40 greenMatte
+        , SceneObject $ Sphere (Vector3 100 0 (-200)) 40 blueMatte
+        , SceneObject $ Sphere (Vector3 0 0 (-350)) 100 darkGrayMatte
+        , SceneObject $ Plane (Vector3 0 (-100) 0) (Vector3 0 1 0) darkGrayMatte
         ] :: [SceneObject]
+      , lights =
+        [ Light.createPoint (Vector3 50 50 100) white 1.0
+        , Light.createPoint (Vector3 (-50) 50 100) white 1.0
+        ]
       , backgroundColor = RGB 0 0 0
       }
     pixels = map clampColor . traceScene $ world

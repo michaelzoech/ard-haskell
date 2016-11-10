@@ -1,6 +1,6 @@
 module ARD.Plane where
 
-import ARD.Color
+import qualified ARD.Color as C
 import qualified ARD.Geometric as G
 import ARD.Ray as Ray
 import ARD.Vector
@@ -9,7 +9,7 @@ data Plane
   = Plane
   { point :: Point3
   , normal :: Normal3
-  , color :: Color
+  , material :: G.Material
   }
 
 kEpsilon = 1.0e-8
@@ -27,7 +27,8 @@ instance G.GeometricObject Plane where
            , G.shadeRecord = G.ShadeRecord
              { G.localHitPoint = o + (d `mul` t)
              , G.normal = n
-             , G.color = color plane
+             , G.material = material plane
+             , G.ray = ray
              }
            }
          else Nothing

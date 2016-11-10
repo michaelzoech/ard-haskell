@@ -1,7 +1,6 @@
 module ARD.Sphere where
 
 import Prelude hiding (div)
-import ARD.Color
 import qualified ARD.Geometric as G
 import qualified ARD.Ray as Ray
 import ARD.Vector
@@ -10,7 +9,7 @@ data Sphere
   = Sphere
   { center :: Point3
   , radius :: Double
-  , color :: Color
+  , material :: G.Material
   }
 
 instance G.GeometricObject Sphere where
@@ -41,7 +40,8 @@ instance G.GeometricObject Sphere where
               , G.shadeRecord = G.ShadeRecord
                   { G.normal = (v + (d `mul` t)) `div` r
                   , G.localHitPoint = o + (d `mul` t)
-                  , G.color = color sphere
+                  , G.material = material sphere
+                  , G.ray = ray
                   }
               }
         in

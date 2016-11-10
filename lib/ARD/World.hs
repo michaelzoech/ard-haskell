@@ -5,6 +5,7 @@ module ARD.World where
 import ARD.Camera
 import ARD.Color
 import ARD.Geometric as G
+import ARD.Light
 import ARD.Ray
 import ARD.ViewPlane
 
@@ -23,6 +24,7 @@ data World
   { camera :: SceneCamera
   , viewPlane :: ViewPlane
   , sceneObjects :: [SceneObject]
+  , lights :: [Light]
   , backgroundColor :: Color
   }
 

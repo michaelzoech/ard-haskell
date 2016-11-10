@@ -23,6 +23,9 @@ instance Num Color where
     in
       RGB (r / 255) (g / 255) (b / 255)
 
+mul :: Color -> Double -> Color
+mul (RGB r g b) d = RGB (r*d) (g*d) (b*d)
+
 -- | Encode Color into Word32.
 -- The ordering of the channels from little to highest is BGR.
 encodeColorToRGBWord32 :: Color -> Word32

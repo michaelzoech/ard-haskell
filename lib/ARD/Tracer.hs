@@ -5,6 +5,7 @@ module ARD.Tracer
 import ARD.Camera
 import ARD.Color
 import ARD.Geometric as G
+import ARD.Material
 import ARD.Ray
 import ARD.Sampler
 import ARD.Vector as Vector
@@ -43,7 +44,11 @@ tracePixel world rays =
 traceRay :: World -> Ray -> Color
 traceRay world ray
   | null hits = backgroundColor world
-  | otherwise = G.color $ G.shadeRecord nearestHit
+  | otherwise =
+    let
+      (G.Material shadeFunc) = (G.material $ G.shadeRecord nearestHit)
+    in
+      shadeFunc (G.shadeRecord nearestHit) (lights world)
   where
     objects = sceneObjects world
     hits = mapMaybe (`hit` ray) objects
