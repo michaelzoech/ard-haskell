@@ -1,6 +1,6 @@
 
 import ARD.Bitmap
-import ARD.Camera
+import qualified ARD.Camera as Camera
 import ARD.Color
 import qualified ARD.Light as Light
 import qualified ARD.Material as Material
@@ -32,7 +32,7 @@ main =
     greenPhong = Material.mkPhong green 1 0.2 white 20
     bluePhong = Material.mkPhong blue 1 0.2 white 150
     world = World
-      { camera = SceneCamera $ makePinholeCamera (Vector3 0 100 400) (Vector3 0 20 (-120)) (Vector3 0 1 0) 450
+      { camera = Camera.mkPinhole (Vector3 0 100 400) (Vector3 0 20 (-120)) (Vector3 0 1 0) 450
       , viewPlane = ViewPlane
         { horizontalResolution = width
         , verticalResolution = height
