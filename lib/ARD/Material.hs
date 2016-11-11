@@ -1,4 +1,7 @@
-module ARD.Material where
+module ARD.Material
+  ( mkMatte
+  , mkPhong
+  ) where
 
 import qualified ARD.Color as C
 import qualified ARD.BRDF as BRDF

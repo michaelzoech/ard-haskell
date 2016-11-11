@@ -1,4 +1,8 @@
-module ARD.BRDF where
+module ARD.BRDF
+  ( BRDF(..)
+  , mkGlossySpecular
+  , mkLambertian
+  ) where
 
 import qualified ARD.Color as C
 import qualified ARD.Geometric as G
