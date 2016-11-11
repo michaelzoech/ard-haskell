@@ -5,7 +5,7 @@ import ARD.Color
 import qualified ARD.Light as Light
 import qualified ARD.Material as Material
 import ARD.Plane
-import ARD.Sampler
+import qualified ARD.Sampler as Sampler
 import ARD.Sphere
 import ARD.Tracer
 import ARD.Vector
@@ -37,7 +37,7 @@ main =
         { horizontalResolution = width
         , verticalResolution = height
         , pixelSize = 0.5
-        , pixelSampler = genRegularSampler 16
+        , pixelSampler = Sampler.mkRegular 16
         }
       , sceneObjects =
         [ SceneObject $ Sphere (Vector3 (-100) (-40) 0) 40 redPhong
