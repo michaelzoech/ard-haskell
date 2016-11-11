@@ -62,5 +62,5 @@ hasHitPoint obj ray hitPoint =
     _ -> expectationFailure "No hit point found"
 
 dummyMaterial :: G.Material
-dummyMaterial = Material.createMatte (C.RGB 1 1 1) 1 0
+dummyMaterial = Material.mkMatte (C.RGB 1 1 1) 1 0
 

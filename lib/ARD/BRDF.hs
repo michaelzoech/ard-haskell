@@ -1,25 +1,29 @@
 module ARD.BRDF where
 
 import qualified ARD.Color as C
-import ARD.Geometric as G
+import qualified ARD.Geometric as G
 import ARD.Vector
 
+type ShadeFunc = (G.ShadeRecord -> Vector3 -> Vector3 -> C.Color)
+
+type RhoFunc = (G.ShadeRecord -> Vector3 -> C.Color)
+
 data BRDF
-  = BRDF (ShadeRecord -> Vector3 -> Vector3 -> C.Color) (ShadeRecord -> Vector3 -> C.Color)
+  = BRDF
+  { shade :: ShadeFunc
+  , rho :: RhoFunc
+  }
 
-createLambertianBRDF :: C.Color -> Double -> BRDF
-createLambertianBRDF cd kd =
-  let
-    f sr wi wo = cd `C.mul` (kd * (1.0 / pi))
+mkLambertian :: C.Color -> Double -> BRDF
+mkLambertian cd kd = BRDF shade rho
+  where
+    shade sr wi wo = cd `C.mul` (kd * (1 / pi))
     rho sr wo = cd `C.mul` kd
-    --sampleF = 
-  in
-    BRDF f rho
 
-createGlossySpecularBRDF :: C.Color -> Double -> BRDF
-createGlossySpecularBRDF ks exp =
-  let
-    f sr wi wo =
+mkGlossySpecular :: C.Color -> Double -> BRDF
+mkGlossySpecular ks exp = BRDF shade rho
+  where
+    shade sr wi wo =
       let
         ndotwi = G.normal sr `dot` wi
         r = (-wi) + G.normal sr `mul` (2 * ndotwi)
@@ -30,5 +34,4 @@ createGlossySpecularBRDF ks exp =
         else
           C.RGB 0 0 0
     rho sr wo = C.RGB 0 0 0
-  in
-    BRDF f rho
+

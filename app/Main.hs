@@ -24,13 +24,13 @@ main =
     blue = RGB 0 0 1
     gray = RGB 0.5 0.5 0.5
     white = RGB 1 1 1
-    redMatte = Material.createMatte red 1 0.2
-    greenMatte = Material.createMatte green 1 0.2
-    blueMatte = Material.createMatte blue 1 0.2
-    grayMatte = Material.createMatte gray 1 0.2
-    redPhong = Material.createPhong red 1 0.2 white 5
-    greenPhong = Material.createPhong green 1 0.2 white 20
-    bluePhong = Material.createPhong blue 1 0.2 white 150
+    redMatte = Material.mkMatte red 1 0.2
+    greenMatte = Material.mkMatte green 1 0.2
+    blueMatte = Material.mkMatte blue 1 0.2
+    grayMatte = Material.mkMatte gray 1 0.2
+    redPhong = Material.mkPhong red 1 0.2 white 5
+    greenPhong = Material.mkPhong green 1 0.2 white 20
+    bluePhong = Material.mkPhong blue 1 0.2 white 150
     world = World
       { camera = SceneCamera $ makePinholeCamera (Vector3 0 100 400) (Vector3 0 20 (-120)) (Vector3 0 1 0) 450
       , viewPlane = ViewPlane
@@ -53,9 +53,9 @@ main =
         , SceneObject $ Plane (Vector3 0 (-100) 0) (Vector3 0 1 0) grayMatte
         ] :: [SceneObject]
       , lights =
-        [ Light.createPoint (Vector3 70 50 100) white 1.0
-        , Light.createPoint (Vector3 0 50 100) white 1.0
-        , Light.createPoint (Vector3 (-70) 50 100) white 1.0
+        [ Light.mkPoint (Vector3 70 50 100) white 1.0
+        , Light.mkPoint (Vector3 (-70) 50 100) white 1.0
+        , Light.mkDirectional (Vector3 0 1 0) white 0.8
         ]
       , backgroundColor = RGB 0 0 0
       }
