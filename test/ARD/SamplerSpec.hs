@@ -17,5 +17,5 @@ standardSamplerSpec = describe "StandardSampler" $ do
 regularSamplerSpec :: Spec
 regularSamplerSpec = describe "RegularSampler" $ do
   it "distributes evenly" $
-    mkRegular 4 `shouldBe` Sampler 4 [Vector2 0.25 0.25, Vector2 0.75 0.25, Vector2 0.25 0.75, Vector2 0.75 0.75]
+    mkRegular 2 `shouldBe` Sampler 4 [Vector2 0.25 0.25, Vector2 0.75 0.25, Vector2 0.25 0.75, Vector2 0.75 0.75]
 

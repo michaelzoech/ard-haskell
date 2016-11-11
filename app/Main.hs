@@ -37,7 +37,7 @@ main =
         { horizontalResolution = width
         , verticalResolution = height
         , pixelSize = 0.5
-        , pixelSampler = Sampler.mkRegular 16
+        , pixelSampler = Sampler.mkRegular 4
         }
       , sceneObjects =
         [ SceneObject $ Sphere (Vector3 (-100) (-40) 0) 40 redPhong
