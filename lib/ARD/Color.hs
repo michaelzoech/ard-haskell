@@ -1,8 +1,8 @@
 module ARD.Color where
 
-import Prelude hiding (div)
 import Data.Bits
 import Data.Word
+import Prelude hiding (div)
 
 data Color
   = RGB !Double !Double !Double

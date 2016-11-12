@@ -1,8 +1,10 @@
 module ARD.VectorSpec where
 
-import Prelude hiding (length)
-import ARD.TestHelper
 import ARD.Vector
+
+import ARD.TestHelper
+
+import Prelude hiding (length)
 import Test.Hspec
 import Test.QuickCheck
 

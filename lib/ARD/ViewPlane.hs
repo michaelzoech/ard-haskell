@@ -1,8 +1,6 @@
 module ARD.ViewPlane where
 
-import ARD.Ray
 import ARD.Sampler
-import ARD.Vector
 
 data ViewPlane
   = ViewPlane

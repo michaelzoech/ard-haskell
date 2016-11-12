@@ -4,9 +4,10 @@ import ARD.Geometric
 import ARD.Ray
 import ARD.Sphere
 import ARD.Vector
-import Data.Maybe
 
 import ARD.TestHelper
+
+import Data.Maybe
 import Test.Hspec
 
 spec :: Spec

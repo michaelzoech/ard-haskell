@@ -3,10 +3,11 @@ module ARD.Bitmap
   ) where
 
 import ARD.Color
+
 import Data.Bits
+import qualified Data.ByteString.Lazy as L
 import Data.Word
 import System.IO
-import qualified Data.ByteString.Lazy as L
 
 data BitmapFileHeader
   = BitmapFileHeader

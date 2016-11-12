@@ -1,9 +1,10 @@
 module ARD.Sphere where
 
-import Prelude hiding (div)
 import qualified ARD.Geometric as G
 import qualified ARD.Ray as Ray
 import ARD.Vector
+
+import Prelude hiding (div)
 
 data Sphere
   = Sphere
@@ -34,12 +35,12 @@ instance G.GeometricObject Sphere where
           denom = 2 * a
           t = (-b - e) / denom
           t' = (-b + e) / denom
-          hitResult t =
+          hitResult tmin =
             Just G.HitResult
-              { G.tmin = t
+              { G.tmin = tmin
               , G.shadeRecord = G.ShadeRecord
-                  { G.normal = (v + (d `mul` t)) `div` r
-                  , G.localHitPoint = o + (d `mul` t)
+                  { G.normal = (v + (d `mul` tmin)) `div` r
+                  , G.localHitPoint = o + (d `mul` tmin)
                   , G.material = material sphere
                   , G.ray = ray
                   }

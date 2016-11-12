@@ -7,6 +7,7 @@ import qualified ARD.Geometric as G
 import qualified ARD.Material as Material
 import qualified ARD.Ray as Ray
 import qualified ARD.Vector as Vector
+
 import Control.Monad (unless)
 import Test.QuickCheck
 import Test.Hspec

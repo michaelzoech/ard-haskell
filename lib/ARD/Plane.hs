@@ -1,6 +1,5 @@
 module ARD.Plane where
 
-import qualified ARD.Color as C
 import qualified ARD.Geometric as G
 import ARD.Ray as Ray
 import ARD.Vector

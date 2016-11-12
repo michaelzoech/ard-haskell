@@ -5,9 +5,8 @@ import qualified ARD.Camera as Camera
 import qualified ARD.Ray as Ray
 import qualified ARD.Vector as V
 
-import Text.ParserCombinators.Parsec
-
 import Test.Hspec
+import Text.ParserCombinators.Parsec
 
 spec :: Spec
 spec = describe "Parser" $ do

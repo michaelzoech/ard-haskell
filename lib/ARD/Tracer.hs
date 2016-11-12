@@ -11,6 +11,7 @@ import ARD.Sampler
 import ARD.Vector as Vector
 import ARD.ViewPlane
 import ARD.World
+
 import Data.List (minimumBy)
 import Data.Maybe (catMaybes, mapMaybe)
 
