@@ -12,6 +12,7 @@ import ARD.Vector as Vector
 import ARD.ViewPlane
 import ARD.World
 
+import Control.Parallel.Strategies as P
 import Data.List (minimumBy)
 import Data.Maybe (catMaybes, mapMaybe)
 
@@ -31,8 +32,9 @@ traceScene world =
     raysPerPixel = [ generateRays samples x y | (x,y) <- xy ]
     pixelPos u v total = ps * (fromIntegral u - 0.5 * total + v)
     generateRays samples x y = map (\(Vector2 x' y') -> generateRay cam (Vector2 (pixelPos x x' resX) (pixelPos y y' resY))) samples
+    colors = map (tracePixel world) raysPerPixel
   in
-    map (tracePixel world) raysPerPixel
+    colors `P.using` P.parListChunk height P.rpar
 
 tracePixel :: World -> [Ray] -> Color
 tracePixel world rays =
