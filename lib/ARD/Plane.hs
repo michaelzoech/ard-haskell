@@ -31,4 +31,12 @@ instance G.GeometricObject Plane where
              }
            }
          else Nothing
+  shadowHit plane ray =
+    let p = point plane
+        n = normal plane
+        o = Ray.origin ray
+        d = Ray.direction ray
+        t = (p - o) `dot` n / (d `dot` n)
+    in
+      if t > kEpsilon then Just t else Nothing
 

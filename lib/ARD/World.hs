@@ -13,6 +13,7 @@ data SceneObject = forall a. GeometricObject a => SceneObject a
 
 instance GeometricObject SceneObject where
   hit (SceneObject o) = hit o
+  shadowHit (SceneObject o) = shadowHit o
 
 data World
   = World

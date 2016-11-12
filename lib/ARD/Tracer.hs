@@ -48,8 +48,9 @@ traceRay world ray
   | otherwise =
     let
       (G.Material shadeFunc) = (G.material $ G.shadeRecord nearestHit)
+      shadowTests = map G.shadowHit (sceneObjects world)
     in
-      shadeFunc (G.shadeRecord nearestHit) (lights world)
+      shadeFunc (G.shadeRecord nearestHit) (lights world) shadowTests
   where
     objects = sceneObjects world
     hits = mapMaybe (`hit` ray) objects

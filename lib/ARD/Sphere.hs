@@ -14,7 +14,24 @@ data Sphere
   }
 
 instance G.GeometricObject Sphere where
-  hit sphere ray =
+  hit sphere ray = do
+    tmin <- G.shadowHit sphere ray
+    let
+      o = Ray.origin ray
+      d = Ray.direction ray
+      s = center sphere
+      r = radius sphere
+      v = o - s
+    return G.HitResult
+      { G.tmin = tmin
+      , G.shadeRecord = G.ShadeRecord
+          { G.normal = (v + (d `mul` tmin)) `div` r
+          , G.localHitPoint = o + (d `mul` tmin)
+          , G.material = material sphere
+          , G.ray = ray
+          }
+      }
+  shadowHit sphere ray =
     let
       o = Ray.origin ray
       d = Ray.direction ray
@@ -35,21 +52,11 @@ instance G.GeometricObject Sphere where
           denom = 2 * a
           t = (-b - e) / denom
           t' = (-b + e) / denom
-          hitResult tmin =
-            Just G.HitResult
-              { G.tmin = tmin
-              , G.shadeRecord = G.ShadeRecord
-                  { G.normal = (v + (d `mul` tmin)) `div` r
-                  , G.localHitPoint = o + (d `mul` tmin)
-                  , G.material = material sphere
-                  , G.ray = ray
-                  }
-              }
         in
           if t > 1.0e-8 then
-            hitResult t
+            Just t
           else if t' > 1.0e-8 then
-            hitResult t'
+            Just t'
           else
             Nothing
 

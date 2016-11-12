@@ -15,16 +15,17 @@ mkMatte cd kd ka = Material shade
   where
     ambient = BRDF.mkLambertian cd ka
     diffuse = BRDF.mkLambertian cd kd
-    shade sr lights =
+    shade sr lights shadowTests =
       let
         wo = -(Ray.direction $ G.ray sr)
         ambientRadiance = BRDF.rho ambient sr wo
-        lightFunc sr (Light directionFunc shadeFunc) =
+        lightFunc sr (Light directionFunc shadeFunc inShadowFunc) =
           let
             wi = directionFunc sr
             ndotwi = G.normal sr `dot` wi
           in
-            if ndotwi > 0 then
+            if ndotwi > 0 &&
+               not (inShadowFunc (Ray.Ray (localHitPoint sr) wi) shadowTests) then
               BRDF.shade diffuse sr wi wo * shadeFunc sr `C.mul` ndotwi
             else
               C.RGB 0 0 0
@@ -37,16 +38,17 @@ mkPhong cd kd ka ks exp = Material shade
     ambient = BRDF.mkLambertian cd ka
     diffuse = BRDF.mkLambertian cd kd
     specular = BRDF.mkGlossySpecular ks exp
-    shade sr lights =
+    shade sr lights shadowTests =
       let
         wo = -(Ray.direction $ G.ray sr)
         ambientRadiance = BRDF.rho ambient sr wo
-        lightFunc sr (Light directionFunc shadeFunc) =
+        lightFunc sr (Light directionFunc shadeFunc inShadowFunc) =
           let
             wi = directionFunc sr
             ndotwi = G.normal sr `dot` wi
           in
-            if ndotwi > 0 then
+            if ndotwi > 0 &&
+               not (inShadowFunc (Ray.Ray (localHitPoint sr) wi) shadowTests) then
               (BRDF.shade diffuse sr wi wo + BRDF.shade specular sr wi wo) * shadeFunc sr `C.mul` ndotwi
             else
               C.RGB 0 0 0
