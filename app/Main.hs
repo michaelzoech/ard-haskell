@@ -4,6 +4,7 @@ import qualified ARD.Camera as Camera
 import ARD.Color
 import qualified ARD.Light as Light
 import qualified ARD.Material as Material
+import qualified ARD.Parser as Parser
 import ARD.Plane
 import qualified ARD.Sampler as Sampler
 import ARD.Sphere
@@ -15,7 +16,19 @@ import Data.Word
 import System.Environment
 
 main :: IO ()
-main =
+main = do
+  file <- readFile "simple.scene"
+  case Parser.parseWorld file of
+    Left err -> putStrLn err
+    Right world ->
+      let
+        width = 800
+        height = 600
+        pixels = map maxToOne . traceScene $ world
+      in writeBitmapToFile width height pixels "simple.bmp"
+
+world :: World
+world =
   let
     width = 800
     height = 600
@@ -31,7 +44,8 @@ main =
     redPhong = Material.mkPhong red 1 0.2 white 5
     greenPhong = Material.mkPhong green 1 0.2 white 20
     bluePhong = Material.mkPhong blue 1 0.2 white 150
-    world = World
+  in
+    World
       { camera = Camera.mkPinhole (Vector3 0 100 400) (Vector3 0 20 (-120)) (Vector3 0 1 0) 450
       , viewPlane = ViewPlane
         { horizontalResolution = width
@@ -59,6 +73,4 @@ main =
         ]
       , backgroundColor = RGB 0 0 0
       }
-    pixels = map maxToOne . traceScene $ world
-  in writeBitmapToFile width height pixels "out.bmp"
 

@@ -1,0 +1,54 @@
+World {
+  camera = PinholeCamera {
+    eye = Vector3 0 50 250,
+    lookAt = Vector3 0 20 -100,
+    up = Vector3 0 1 0,
+    distance = 500
+  },
+  viewPlane = ViewPlane {
+    horizontalResolution = 800,
+    verticalResolution = 600,
+    pixelSize = 1,
+    sampler = Regular {
+      samplesPerAxis = 4
+    }
+  },
+  sceneObjects = [
+    Sphere { center = Vector3 -100 -40 0, radius = 40, material = Phong { cd = RGB 1 0 0, kd = 1, ka = 0.1, ks = RGB 1 1 1, exp = 5 } },
+    Sphere { center = Vector3 0 -40 0, radius = 40, material = Phong { cd = RGB 0 1 0, kd = 1, ka = 0.1, ks = RGB 1 1 1, exp = 20 } },
+    Sphere { center = Vector3 100 -40 0, radius = 40, material = Phong { cd = RGB 0 0 1, kd = 1, ka = 0.1, ks = RGB 1 1 1, exp = 150 } },
+    Sphere { center = Vector3 -100 20 -80, radius = 40, material = Matte { cd = RGB 1 0 0, kd = 1, ka = 0.1 } },
+    Sphere { center = Vector3 0 20 -80, radius = 40, material = Matte { cd = RGB 0 1 0, kd = 1, ka = 0.1 } },
+    Sphere { center = Vector3 100 20 -80, radius = 40, material = Matte { cd = RGB 0 0 1, kd = 1, ka = 0.1 } },
+    Sphere { center = Vector3 -100 80 -160, radius = 40, material = Matte { cd = RGB 1 0 0, kd = 1, ka = 0.1 } },
+    Sphere { center = Vector3 0 80 -160, radius = 40, material = Matte { cd = RGB 0 1 0, kd = 1, ka = 0.1 } },
+    Sphere { center = Vector3 100 80 -160, radius = 40, material = Matte { cd = RGB 0 0 1, kd = 1, ka = 0.1 } },
+    Plane {
+      point = Vector3 0 -100 0,
+      normal = Vector3 0 1 0,
+      material = Matte {
+        cd = RGB 0.5 0.5 0.5,
+        kd = 1,
+        ka = 0.2
+      }
+    }
+  ],
+  lights = [
+    PointLight {
+      location = Vector3 70 50 100,
+      color = RGB 1 1 1,
+      ls = 1.0
+    },
+    PointLight {
+      location = Vector3 -70 50 100,
+      color = RGB 1 1 1,
+      ls = 1.0
+    },
+    DirectionalLight {
+      invertDirection = Vector3 0 1 0,
+      color = RGB 1 1 1,
+      ls = 0.8
+    }
+  ],
+  backgroundColor = RGB 0 0 0
+}
