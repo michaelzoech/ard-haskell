@@ -7,4 +7,5 @@ data Ray
   { origin :: Point3
   , direction :: Vector3
   }
+  deriving (Eq, Show)
 

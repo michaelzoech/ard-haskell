@@ -18,25 +18,21 @@ import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
 import Text.ParserCombinators.Parsec.Char
 import Text.ParserCombinators.Parsec.Combinator
 
-parseWorld :: String -> Either String World.World
-parseWorld input =
-  case parse (spaces *> world) "(unknown)" input of
+parseWorld :: String -> String -> Either String World.World
+parseWorld sourceName input =
+  case parse (spaces *> world) sourceName input of
     Left err -> Left (show err)
     Right w -> Right w
 
 world :: CharParser () World.World
 world = do
-  openType "World"
+  openBrace "World"
   camera <- field "camera" camera
-  fieldSep
-  viewPlane <- field "viewPlane" viewPlane
-  fieldSep
-  sceneObjects <- field "sceneObjects" (array sceneObject)
-  fieldSep
-  lights <- field "lights" (array light)
-  fieldSep
-  backgroundColor <- field "backgroundColor" color
-  closeType
+  viewPlane <- field' "viewPlane" viewPlane
+  sceneObjects <- field' "sceneObjects" (array sceneObject)
+  lights <- field' "lights" (array light)
+  backgroundColor <- field' "backgroundColor" color
+  closeBrace
   return World.World
     { World.camera = camera
     , World.viewPlane = viewPlane
@@ -47,15 +43,12 @@ world = do
 
 viewPlane :: CharParser () ViewPlane.ViewPlane
 viewPlane = do
-  openType "ViewPlane"
+  openBrace "ViewPlane"
   hres <- field "horizontalResolution" int
-  fieldSep
-  vres <- field "verticalResolution" int
-  fieldSep
-  pixelSize <- field "pixelSize" double
-  fieldSep
-  sampler <- field "sampler" sampler
-  closeType
+  vres <- field' "verticalResolution" int
+  pixelSize <- field' "pixelSize" double
+  sampler <- field' "sampler" sampler
+  closeBrace
   return ViewPlane.ViewPlane
     { ViewPlane.horizontalResolution = hres
     , ViewPlane.verticalResolution = vres
@@ -68,9 +61,9 @@ sampler = regular <|> standard
 
 regular :: CharParser () Sampler.Sampler
 regular = do
-  openType "Regular"
+  openBrace "Regular"
   samplesPerAxis <- field "samplesPerAxis" int
-  closeType
+  closeBrace
   return $ Sampler.mkRegular samplesPerAxis
 
 standard :: CharParser () Sampler.Sampler
@@ -83,50 +76,40 @@ light = ambientLight <|> directionalLight <|> pointLight
 
 ambientLight :: CharParser () Geometric.Light
 ambientLight = do
-  openType "AmbientLight"
+  openBrace "AmbientLight"
   color <- field "color" color
-  fieldSep
-  ls <- field "ls" double
-  closeType
+  ls <- field' "ls" double
+  closeBrace
   return $ Light.mkAmbient color ls
 
 directionalLight :: CharParser () Geometric.Light
 directionalLight = do
-  openType "DirectionalLight"
+  openBrace "DirectionalLight"
   invDir <- field "invertDirection" vector3
-  fieldSep
-  color <- field "color" color
-  fieldSep
-  ls <- field "ls" double
-  closeType
+  color <- field' "color" color
+  ls <- field' "ls" double
+  closeBrace
   return $ Light.mkDirectional invDir color ls
 
 pointLight :: CharParser () Geometric.Light
 pointLight = do
-  openType "PointLight"
+  openBrace "PointLight"
   location <- field "location" vector3
-  fieldSep
-  color <- field "color" color
-  fieldSep
-  ls <- field "ls" double
-  closeType
+  color <- field' "color" color
+  ls <- field' "ls" double
+  closeBrace
   return $ Light.mkPoint location color ls
-
-array :: CharParser () a -> CharParser () [a]
-array f = char '[' *> spaces *> sepBy f fieldSep <* spaces <* char ']'
 
 sceneObject :: CharParser () World.SceneObject
 sceneObject = sphere <|> plane
 
 sphere :: CharParser () World.SceneObject
 sphere = do
-  openType "Sphere"
+  openBrace "Sphere"
   center <- field "center" vector3
-  fieldSep
-  radius <- field "radius" double
-  fieldSep
-  material <- field "material" material
-  closeType
+  radius <- field' "radius" double
+  material <- field' "material" material
+  closeBrace
   return $ World.SceneObject Sphere.Sphere
     { Sphere.center = center
     , Sphere.radius = radius
@@ -135,13 +118,11 @@ sphere = do
 
 plane :: CharParser () World.SceneObject
 plane = do
-  openType "Plane"
+  openBrace "Plane"
   point <- field "point" vector3
-  fieldSep
-  normal <- field "normal" vector3
-  fieldSep
-  material <- field "material" material
-  closeType
+  normal <- field' "normal" vector3
+  material <- field' "material" material
+  closeBrace
   return $ World.SceneObject Plane.Plane
     { Plane.point = point
     , Plane.normal = normal
@@ -153,28 +134,22 @@ material = matte <|> phong
 
 matte :: CharParser () Geometric.Material
 matte = do
-  openType "Matte"
+  openBrace "Matte"
   cd <- field "cd" color
-  fieldSep
-  kd <- field "kd" double
-  fieldSep
-  ka <- field "ka" double
-  closeType
+  kd <- field' "kd" double
+  ka <- field' "ka" double
+  closeBrace
   return $ Material.mkMatte cd kd ka
 
 phong :: CharParser () Geometric.Material
 phong = do
-  openType "Phong"
+  openBrace "Phong"
   cd <- field "cd" color
-  fieldSep
-  kd <- field "kd" double
-  fieldSep
-  ka <- field "ka" double
-  fieldSep
-  ks <- field "ks" color
-  fieldSep
-  exp <- field "exp" double
-  closeType
+  kd <- field' "kd" double
+  ka <- field' "ka" double
+  ks <- field' "ks" color
+  exp <- field' "exp" double
+  closeBrace
   return $ Material.mkPhong cd kd ka ks exp
 
 camera :: CharParser () Camera.Camera
@@ -182,26 +157,21 @@ camera = pinholeCamera <|> orthographicCamera
 
 pinholeCamera :: CharParser () Camera.Camera
 pinholeCamera = do
-  openType "PinholeCamera"
+  openBrace "PinholeCamera"
   eye <- field "eye" vector3
-  fieldSep
-  lookAt <- field "lookAt" vector3
-  fieldSep
-  up <- field "up" vector3
-  fieldSep
-  distance <- field "distance" double
-  closeType
+  lookAt <- field' "lookAt" vector3
+  up <- field' "up" vector3
+  distance <- field' "distance" double
+  closeBrace
   return $ Camera.mkPinhole eye lookAt up distance
 
 orthographicCamera :: CharParser () Camera.Camera
 orthographicCamera = do
-  openType "OrthographicCamera"
+  openBrace "OrthographicCamera"
   eye <- field "eye" vector3
-  fieldSep
-  lookAt <- field "lookAt" vector3
-  fieldSep
-  up <- field "up" vector3
-  closeType
+  lookAt <- field' "lookAt" vector3
+  up <- field' "up" vector3
+  closeBrace
   return $ Camera.mkOrthographic eye lookAt up
 
 vector2 :: CharParser () Vector.Vector2
@@ -219,13 +189,19 @@ color = do
   string "RGB"
   Color.RGB <$> (spaces1 *> double) <*> (spaces1 *> double) <*> (spaces1 *> double)
 
-openType :: String -> CharParser () ()
-openType name = string name *> spaces *> char '{' *> spaces
+openBrace :: String -> CharParser () ()
+openBrace name = string name *> spaces *> char '{' *> spaces
 
-closeType :: CharParser () ()
-closeType = spaces *> char '}' *> spaces
+closeBrace :: CharParser () ()
+closeBrace = spaces *> char '}' *> spaces
 
-field :: String -> CharParser () a -> CharParser() a
+array :: CharParser () a -> CharParser () [a]
+array f = char '[' *> spaces *> sepBy f fieldSep <* spaces <* char ']'
+
+field' :: String -> CharParser () a -> CharParser () a
+field' name valueParser = fieldSep *> field name valueParser
+
+field :: String -> CharParser () a -> CharParser () a
 field name valueParser = string name *> spaces *> char '=' *> spaces *> valueParser
 
 fieldSep :: CharParser () ()

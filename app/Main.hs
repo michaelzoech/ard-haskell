@@ -17,8 +17,10 @@ import System.Environment
 
 main :: IO ()
 main = do
-  file <- readFile "simple.scene"
-  case Parser.parseWorld file of
+  let
+    filepath = "simple.scene"
+  file <- readFile filepath
+  case Parser.parseWorld filepath file of
     Left err -> putStrLn err
     Right world ->
       let
