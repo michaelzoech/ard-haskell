@@ -43,9 +43,9 @@ world =
     greenMatte = Material.mkMatte green 1 0.2
     blueMatte = Material.mkMatte blue 1 0.2
     grayMatte = Material.mkMatte gray 1 0.2
-    redPhong = Material.mkPhong red 1 0.2 white 5
-    greenPhong = Material.mkPhong green 1 0.2 white 20
-    bluePhong = Material.mkPhong blue 1 0.2 white 150
+    redPhong = Material.mkPhong red 1 0.2 1 5
+    greenPhong = Material.mkPhong green 1 0.2 1 20
+    bluePhong = Material.mkPhong blue 1 0.2 1 150
   in
     World
       { camera = Camera.mkPinhole (Vector3 0 100 400) (Vector3 0 20 (-120)) (Vector3 0 1 0) 450

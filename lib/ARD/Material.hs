@@ -31,7 +31,7 @@ mkMatte cd kd ka = Material shade
       in
         foldr ((+) . lightFunc sr) ambientRadiance lights
 
-mkPhong :: C.Color -> Double -> Double -> C.Color -> Double -> Material
+mkPhong :: C.Color -> Double -> Double -> Double -> Double -> Material
 mkPhong cd kd ka ks exp = Material shade
   where
     ambient = BRDF.mkLambertian cd ka

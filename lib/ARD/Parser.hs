@@ -147,7 +147,7 @@ phong = do
   cd <- field "cd" color
   kd <- field' "kd" double
   ka <- field' "ka" double
-  ks <- field' "ks" color
+  ks <- field' "ks" double
   exp <- field' "exp" double
   closeBrace
   return $ Material.mkPhong cd kd ka ks exp
