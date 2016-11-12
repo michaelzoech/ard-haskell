@@ -3,7 +3,7 @@ version:              0.1.0.0
 synopsis:             Another Raytracer Demo
 description:          Another Raytracer Demo
 license:              MIT
-license-file:         LICENSE
+license-file:         LICENSE.txt
 author:               Michael Zoech
 maintainer:           michi.zoech@gmail.com
 -- copyright:
