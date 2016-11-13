@@ -18,3 +18,7 @@ run:
 clean:
 	stack clean
 
+.PHONY: doc
+doc:
+	stack haddock --open
+
