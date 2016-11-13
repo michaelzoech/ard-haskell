@@ -1,20 +1,8 @@
 module ARD.Geometric where
 
-import ARD.Color
+import ARD.Material
 import ARD.Ray
 import ARD.Vector
-
-type ShadeFunc = ShadeRecord -> [Light] -> [Ray -> Maybe Double] -> Color
-
-data Material
-  = Material ShadeFunc
-
-type DirectionFunc = (ShadeRecord -> Vector3)
-type IncidenceRadianceFunc = (ShadeRecord -> Color)
-type InShadowFunc = (Ray -> [Ray -> Maybe Double] -> Bool)
-
-data Light
-  = Light DirectionFunc IncidenceRadianceFunc InShadowFunc
 
 data HitResult = HitResult
   { tmin :: Double

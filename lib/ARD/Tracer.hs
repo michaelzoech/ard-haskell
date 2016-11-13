@@ -49,12 +49,19 @@ traceRay world ray
   | null hits = backgroundColor world
   | otherwise =
     let
-      (G.Material shadeFunc) = (G.material $ G.shadeRecord nearestHit)
-      shadowTests = map G.shadowHit (sceneObjects world)
+      (Material shadeFunc) = (G.material $ G.shadeRecord nearestHit)
+      shadowTests = map shadowHit (sceneObjects world)
     in
-      shadeFunc (G.shadeRecord nearestHit) (lights world) shadowTests
+      shadeFunc (shadeRecordToShadeInfo $ G.shadeRecord nearestHit) (lights world) shadowTests
   where
     objects = sceneObjects world
     hits = mapMaybe (`hit` ray) objects
     nearestHit = minimumBy (\a b ->G.tmin a `compare` G.tmin b) hits
 
+shadeRecordToShadeInfo :: G.ShadeRecord -> ShadeInfo
+shadeRecordToShadeInfo sr =
+  ShadeInfo
+    { shadePoint = G.localHitPoint sr
+    , shadeNormal = G.normal sr
+    , shadeOutgoingRay = G.ray sr
+    }

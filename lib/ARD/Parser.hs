@@ -71,10 +71,10 @@ standard = do
   string "Standard"
   return Sampler.mkStandard
 
-light :: CharParser () Geometric.Light
+light :: CharParser () Light.Light
 light = ambientLight <|> directionalLight <|> pointLight
 
-ambientLight :: CharParser () Geometric.Light
+ambientLight :: CharParser () Light.Light
 ambientLight = do
   openBrace "AmbientLight"
   color <- field "color" color
@@ -82,7 +82,7 @@ ambientLight = do
   closeBrace
   return $ Light.mkAmbient color ls
 
-directionalLight :: CharParser () Geometric.Light
+directionalLight :: CharParser () Light.Light
 directionalLight = do
   openBrace "DirectionalLight"
   invDir <- field "invertDirection" vector3
@@ -91,7 +91,7 @@ directionalLight = do
   closeBrace
   return $ Light.mkDirectional invDir color ls
 
-pointLight :: CharParser () Geometric.Light
+pointLight :: CharParser () Light.Light
 pointLight = do
   openBrace "PointLight"
   location <- field "location" vector3
@@ -129,10 +129,10 @@ plane = do
     , Plane.material = material
     }
 
-material :: CharParser() Geometric.Material
+material :: CharParser() Material.Material
 material = matte <|> phong
 
-matte :: CharParser () Geometric.Material
+matte :: CharParser () Material.Material
 matte = do
   openBrace "Matte"
   cd <- field "cd" color
@@ -141,7 +141,7 @@ matte = do
   closeBrace
   return $ Material.mkMatte cd kd ka
 
-phong :: CharParser () Geometric.Material
+phong :: CharParser () Material.Material
 phong = do
   openBrace "Phong"
   cd <- field "cd" color

@@ -62,6 +62,6 @@ hasHitPoint obj ray hitPoint =
         G.localHitPoint shadeRec `shouldBe` hitPoint
     _ -> expectationFailure "No hit point found"
 
-dummyMaterial :: G.Material
+dummyMaterial :: Material.Material
 dummyMaterial = Material.mkMatte (C.RGB 1 1 1) 1 0
 

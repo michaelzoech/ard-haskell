@@ -11,7 +11,7 @@ import ARD.Vector
 
 -- | Calculates the reflected radiance of an incoming direction to a reflected direction.
 -- Input: Surface normal -> Incoming direction -> Reflected direction
-type ShadeFunc = ( Vector3 -> Vector3 -> Vector3 -> C.Color)
+type ShadeFunc = (Vector3 -> Vector3 -> Vector3 -> C.Color)
 
 type RhoFunc = (Vector3 -> C.Color)
 

@@ -1,6 +1,7 @@
 module ARD.Plane where
 
 import qualified ARD.Geometric as G
+import ARD.Material
 import ARD.Ray as Ray
 import ARD.Vector
 
@@ -8,7 +9,7 @@ data Plane
   = Plane
   { point :: Point3
   , normal :: Normal3
-  , material :: G.Material
+  , material :: Material
   }
 
 kEpsilon = 1.0e-8

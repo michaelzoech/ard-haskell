@@ -1,6 +1,7 @@
 module ARD.Sphere where
 
 import qualified ARD.Geometric as G
+import ARD.Material
 import qualified ARD.Ray as Ray
 import ARD.Vector
 
@@ -10,7 +11,7 @@ data Sphere
   = Sphere
   { center :: Point3
   , radius :: Double
-  , material :: G.Material
+  , material :: Material
   }
 
 instance G.GeometricObject Sphere where
