@@ -9,9 +9,10 @@ import ARD.Color as C
 import qualified ARD.BRDF as BRDF
 import ARD.Light as Light
 import ARD.Ray as Ray
+import ARD.Rendering
 import ARD.Vector
 
-type ShadeFunc = ShadeInfo -> [Light.Light] -> [Ray -> Maybe Double] -> Color
+type ShadeFunc = RenderContext -> ShadeInfo -> [Light.Light] -> Light -> [Ray -> Maybe Double] -> Color
 
 data ShadeInfo = ShadeInfo
   { shadePoint :: Vector3
@@ -27,19 +28,20 @@ mkMatte cd kd ka = Material shade
   where
     ambient = BRDF.mkLambertian cd ka
     diffuse = BRDF.mkLambertian cd kd
-    shade si lights shadowTests =
+    shade renderContext si lights ambientLight shadowTests =
       let
         wo = -(Ray.direction $ shadeOutgoingRay si)
-        ambientRadiance = BRDF.rho ambient wo
+        n = shadeNormal si
+        point = shadePoint si
+        ambientRadiance = BRDF.rho ambient wo * (Light.incidenceRadianceFunc ambientLight) renderContext point n shadowTests
         lightFunc (Light directionFunc incidenceRadiance inShadowFunc) =
           let
-            wi = directionFunc (shadePoint si)
-            n = shadeNormal si
+            wi = directionFunc renderContext point n
             ndotwi = n `dot` wi
           in
             if ndotwi > 0 &&
                not (inShadowFunc (Ray.Ray (shadePoint si) wi) shadowTests) then
-              BRDF.shade diffuse n wi wo * incidenceRadiance `C.mul` ndotwi
+              BRDF.shade diffuse n wi wo * incidenceRadiance renderContext point n shadowTests `C.mul` ndotwi
             else
               C.RGB 0 0 0
       in
@@ -51,19 +53,20 @@ mkPhong cd kd ka ks exp = Material shade
     ambient = BRDF.mkLambertian cd ka
     diffuse = BRDF.mkLambertian cd kd
     specular = BRDF.mkGlossySpecular ks exp
-    shade si lights shadowTests =
+    shade renderContext si lights ambientLight shadowTests =
       let
         wo = -(Ray.direction $ shadeOutgoingRay si)
-        ambientRadiance = BRDF.rho ambient wo
+        n = shadeNormal si
+        point = shadePoint si
+        ambientRadiance = BRDF.rho ambient wo * (Light.incidenceRadianceFunc ambientLight) renderContext point n shadowTests
         lightFunc (Light directionFunc incidenceRadiance inShadowFunc) =
           let
-            wi = directionFunc (shadePoint si)
-            n = shadeNormal si
+            wi = directionFunc renderContext point n
             ndotwi = n `dot` wi
           in
             if ndotwi > 0 &&
                not (inShadowFunc (Ray.Ray (shadePoint si) wi) shadowTests) then
-              (BRDF.shade diffuse n wi wo + BRDF.shade specular n wi wo) * incidenceRadiance `C.mul` ndotwi
+              (BRDF.shade diffuse n wi wo + BRDF.shade specular n wi wo) * incidenceRadiance renderContext point n shadowTests `C.mul` ndotwi
             else
               C.RGB 0 0 0
       in

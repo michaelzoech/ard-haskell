@@ -1,6 +1,7 @@
 import ARD.Color
 import ARD.Bitmap
 import ARD.Parser (parseWorld)
+import ARD.Randomize
 import ARD.Tracer
 import ARD.ViewPlane
 import ARD.World

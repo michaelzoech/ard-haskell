@@ -12,7 +12,7 @@ test:
 
 .PHONY: run
 run:
-	stack exec ard scenes/simple.ard
+	eval time stack exec ard scenes/ambient_occlusion.ard
 
 .PHONY: clean
 clean:

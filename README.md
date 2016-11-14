@@ -10,6 +10,7 @@ The implementation is based on the book "Ray Tracing from the Group Up" by Kevin
   * Plane
 * Lights
   * Ambient
+  * Ambient Occlusion
   * Directional
   * Point
 * Viewing
@@ -18,8 +19,9 @@ The implementation is based on the book "Ray Tracing from the Group Up" by Kevin
 * BRDF/Materials
   * Matte
   * Phong
-* Non-random sampling for antialiasing
+* Sampling for antialiasing
 * Hard shadows
+* Soft shadows via Ambient Occlusion
 * Scene definition in file
 * Parallelization of pixel tracing
 

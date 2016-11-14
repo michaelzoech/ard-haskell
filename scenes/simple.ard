@@ -9,11 +9,11 @@ let blue = color 0 0 1
 let white = color 1 1 1
 let black = color 0 0 0
 
-let redMatte   = material { matte cd red   kd 1 ka 0.1 }
-let greenMatte = material { matte cd green kd 1 ka 0.1 }
-let blueMatte  = material { matte cd blue  kd 1 ka 0.1 }
+let redMatte   = material { matte cd red   kd 1 ka 0.3 }
+let greenMatte = material { matte cd green kd 1 ka 0.3 }
+let blueMatte  = material { matte cd blue  kd 1 ka 0.3 }
 
-let boxMaterial = material { matte cd 0.5 0.5 0.5 kd 1 ka 0.2 }
+let boxMaterial = material { matte cd 0.5 0.5 0.5 kd 1 ka 0.3 }
 
 backgroundColor black
 
@@ -31,13 +31,13 @@ viewplane {
   pixelsize 1
   sampler {
     regular
-    axis 4
+    axis 8
   }
 }
 
-sphere { center -100   -40    0  radius 40  material { phong cd red   kd 1 ka 0.1 ks 1 exp   5 } }
-sphere { center    0   -40    0  radius 40  material { phong cd green kd 1 ka 0.1 ks 1 exp  20 } }
-sphere { center  100   -40    0  radius 40  material { phong cd blue  kd 1 ka 0.1 ks 1 exp 150 } }
+sphere { center -100   -40    0  radius 40  material { phong cd red   kd 1 ka 0.3 ks 1 exp   5 } }
+sphere { center    0   -40    0  radius 40  material { phong cd green kd 1 ka 0.3 ks 1 exp  20 } }
+sphere { center  100   -40    0  radius 40  material { phong cd blue  kd 1 ka 0.3 ks 1 exp 150 } }
 
 sphere { center -100    20  -80  radius 40  material redMatte }
 sphere { center    0    20  -80  radius 40  material greenMatte }
@@ -54,5 +54,10 @@ plane { point 0 0 -250 normal 0 0 1 material boxMaterial }
 light { point location  70 50 100 color white ls 1 }
 light { point location -70 50 100 color white ls 1 }
 
-light { directional invertDirection 0 1 0 color white ls 0.8 }
+ambientLight {
+  directional
+  invertDirection 0 1 0
+  color white
+  ls 0.8
+}
 

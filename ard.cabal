@@ -33,6 +33,7 @@ library
                       ARD.Plane,
                       ARD.Randomize,
                       ARD.Ray,
+                      ARD.Rendering,
                       ARD.Sampler,
                       ARD.Sphere,
                       ARD.Tracer,

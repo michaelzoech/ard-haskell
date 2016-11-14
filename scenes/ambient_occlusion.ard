@@ -1,0 +1,73 @@
+# vim: ts=2 sw=2 et
+
+camera {
+  pinhole
+  eye 0 13 40
+  lookAt 0 0 3
+  up 0 1 0
+  distance 100
+}
+
+viewplane {
+  horizontal 640
+  vertical 480
+  pixelsize 0.12
+  sampler {
+    regular
+    axis 8
+  }
+}
+
+sphere {
+  center -7 0 0
+  radius 6
+  material {
+    matte
+    cd 1 1 1
+    kd 1
+    ka 1
+  }
+}
+
+sphere {
+  center 7 0 0
+  radius 6
+  material {
+    matte
+    cd 1 1 1
+    kd 1
+    ka 1
+  }
+}
+
+plane {
+  point 0 -6 0
+  normal 0 1 0
+  material {
+    matte
+    cd 1 1 1
+    kd 1
+    ka 0.3
+  }
+}
+
+light {
+  directional
+  invertDirection 0 1 0
+  color 1 1 1
+  ls 0
+}
+
+ambientLight {
+  ambientOccluder
+  color 1 1 1
+  ls 1
+  minColor 0.2 0.2 0.2
+  sampler {
+    jittered
+    axis 8
+  }
+}
+
+backgroundColor 0 0 0
+

@@ -43,6 +43,7 @@ data Context
   , viewPlane :: Maybe ViewPlane.ViewPlane
   , sceneObjects :: [World.SceneObject]
   , lights :: [Light.Light]
+  , ambientLight :: Maybe Light.Light
   , backgroundColor :: Maybe Color.Color
   , globals :: Globals
   }
@@ -56,11 +57,13 @@ parseWorld sourceName input = do
   context <- parseScene sourceName input
   c <- eitherFromMaybe (camera context) "No camera in scene"
   vp <- eitherFromMaybe (viewPlane context) "No view plane in scene"
+  ambientLight <- eitherFromMaybe (ambientLight context) "No ambient light in scene"
   return World.World
     { World.camera = c
     , World.viewPlane = vp
     , World.sceneObjects = sceneObjects context
     , World.lights = lights context
+    , World.ambientLight = ambientLight
     , World.backgroundColor = Maybe.fromMaybe (Color.RGB 0 0 0) (backgroundColor context)
     , World.randomState = randomState context
     }
@@ -74,6 +77,7 @@ parseScene sourceName input =
       , viewPlane = Nothing
       , sceneObjects = []
       , lights = []
+      , ambientLight = Nothing
       , backgroundColor = Nothing
       , globals = Globals
         { globalNames = Set.empty
@@ -89,7 +93,7 @@ parseScene sourceName input =
 pScene :: CharParser Context Context
 pScene = do
   spaces
-  manyTill ((pComment <|> pLet <|> pCamera <|> pViewPlane <|> pLight <|> pPlane <|> pSphere <|> pBackgroundColor <|> pRandom) <* spaces) (try eof)
+  manyTill ((pComment <|> pLet <|> pCamera <|> pViewPlane <|> pLight <|> pPlane <|> pSphere <|> pBackgroundColor <|> pRandom <|> pAmbientLight) <* spaces) (try eof)
   getState
 
 pLet :: CharParser Context ()
@@ -131,6 +135,13 @@ pRandom = do
   seed <- pInt
   spaces
   updateState $ \c -> c { randomState = Randomize.mkRandomState seed }
+
+pAmbientLight :: CharParser Context ()
+pAmbientLight = do
+  try $ pSymbol "ambientLight"
+  light <- pLightBlock
+  spaces
+  updateState $ \c -> c { ambientLight = Just light }
 
 pViewPlane :: CharParser Context ()
 pViewPlane = do
@@ -217,14 +228,20 @@ pMaterialBlock = do
 pLight :: CharParser Context ()
 pLight = do
   try $ pSymbol "light"
+  light <- pLightBlock
+  updateState $ \c -> c{ lights = lights c ++ [light] }
+
+pLightBlock :: CharParser Context Light.Light
+pLightBlock = do
   pBraceOpen
-  ltype <- try (pSymbol "ambient") <|> try (pSymbol "directional") <|> try (pSymbol "point")
+  ltype <- try (pSymbol "ambient") <|> try (pSymbol "ambientOccluder") <|> try (pSymbol "directional") <|> try (pSymbol "point")
   light <- case ltype of
     "ambient" -> Light.mkAmbient <$> pField "color" pColor <*> pField "ls" pDouble
+    "ambientOccluder" -> Light.mkAmbientOccluder <$> pField "color" pColor <*> pField "ls" pDouble <*> pField "minColor" pColor <*> pField "sampler" pSampler
     "directional" -> Light.mkDirectional <$> pField "invertDirection" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
     "point" -> Light.mkPoint <$> pField "location" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
   pBraceClose
-  updateState $ \c -> c{ lights = lights c ++ [light] }
+  return light
 
 pSampler :: CharParser Context Sampler.Sampler
 pSampler = do

@@ -22,6 +22,7 @@ data World
   , viewPlane :: ViewPlane
   , sceneObjects :: [SceneObject]
   , lights :: [Light]
+  , ambientLight :: Light
   , backgroundColor :: Color
   , randomState :: Random
   }
