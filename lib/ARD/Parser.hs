@@ -14,17 +14,27 @@ import qualified ARD.World as World
 
 import Control.Applicative
 import Numeric (readDec, readFloat, readSigned)
+import System.Random
 import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
 import Text.ParserCombinators.Parsec.Char
 import Text.ParserCombinators.Parsec.Combinator
 
+data Context
+  = Context
+  { randomValues :: [Double]
+  }
+
 parseWorld :: String -> String -> Either String World.World
 parseWorld sourceName input =
-  case parse (spaces *> world) sourceName input of
-    Left err -> Left (show err)
-    Right w -> Right w
+  let
+    values = (randoms $ mkStdGen 0) :: [Double]
+    context = Context { randomValues = values }
+  in
+    case runParser (spaces *> world) context sourceName input of
+      Left err -> Left (show err)
+      Right w -> Right w
 
-world :: CharParser () World.World
+world :: CharParser Context World.World
 world = do
   openBrace "World"
   camera <- field "camera" camera
@@ -41,7 +51,7 @@ world = do
     , World.backgroundColor = backgroundColor
     }
 
-viewPlane :: CharParser () ViewPlane.ViewPlane
+viewPlane :: CharParser Context ViewPlane.ViewPlane
 viewPlane = do
   openBrace "ViewPlane"
   hres <- field "horizontalResolution" int
@@ -56,25 +66,33 @@ viewPlane = do
     , ViewPlane.pixelSampler = sampler
     }
 
-sampler :: CharParser () Sampler.Sampler
-sampler = regular <|> standard
+sampler :: CharParser Context Sampler.Sampler
+sampler = jittered <|> regular <|> standard
 
-regular :: CharParser () Sampler.Sampler
+jittered :: CharParser Context Sampler.Sampler
+jittered = do
+  openBrace "Jittered"
+  samplesPerAxis <- field "samplesPerAxis" int
+  closeBrace
+  rands <- takeRandomValues (samplesPerAxis*samplesPerAxis*2)
+  return $ Sampler.mkJittered samplesPerAxis rands
+
+regular :: CharParser Context Sampler.Sampler
 regular = do
   openBrace "Regular"
   samplesPerAxis <- field "samplesPerAxis" int
   closeBrace
   return $ Sampler.mkRegular samplesPerAxis
 
-standard :: CharParser () Sampler.Sampler
+standard :: CharParser Context Sampler.Sampler
 standard = do
   string "Standard"
   return Sampler.mkStandard
 
-light :: CharParser () Light.Light
+light :: CharParser Context Light.Light
 light = ambientLight <|> directionalLight <|> pointLight
 
-ambientLight :: CharParser () Light.Light
+ambientLight :: CharParser Context Light.Light
 ambientLight = do
   openBrace "AmbientLight"
   color <- field "color" color
@@ -82,7 +100,7 @@ ambientLight = do
   closeBrace
   return $ Light.mkAmbient color ls
 
-directionalLight :: CharParser () Light.Light
+directionalLight :: CharParser Context Light.Light
 directionalLight = do
   openBrace "DirectionalLight"
   invDir <- field "invertDirection" vector3
@@ -91,7 +109,7 @@ directionalLight = do
   closeBrace
   return $ Light.mkDirectional invDir color ls
 
-pointLight :: CharParser () Light.Light
+pointLight :: CharParser Context Light.Light
 pointLight = do
   openBrace "PointLight"
   location <- field "location" vector3
@@ -100,10 +118,10 @@ pointLight = do
   closeBrace
   return $ Light.mkPoint location color ls
 
-sceneObject :: CharParser () World.SceneObject
+sceneObject :: CharParser Context World.SceneObject
 sceneObject = sphere <|> plane
 
-sphere :: CharParser () World.SceneObject
+sphere :: CharParser Context World.SceneObject
 sphere = do
   openBrace "Sphere"
   center <- field "center" vector3
@@ -116,7 +134,7 @@ sphere = do
     , Sphere.material = material
     }
 
-plane :: CharParser () World.SceneObject
+plane :: CharParser Context World.SceneObject
 plane = do
   openBrace "Plane"
   point <- field "point" vector3
@@ -129,10 +147,10 @@ plane = do
     , Plane.material = material
     }
 
-material :: CharParser() Material.Material
+material :: CharParser Context Material.Material
 material = matte <|> phong
 
-matte :: CharParser () Material.Material
+matte :: CharParser Context Material.Material
 matte = do
   openBrace "Matte"
   cd <- field "cd" color
@@ -141,7 +159,7 @@ matte = do
   closeBrace
   return $ Material.mkMatte cd kd ka
 
-phong :: CharParser () Material.Material
+phong :: CharParser Context Material.Material
 phong = do
   openBrace "Phong"
   cd <- field "cd" color
@@ -152,10 +170,10 @@ phong = do
   closeBrace
   return $ Material.mkPhong cd kd ka ks exp
 
-camera :: CharParser () Camera.Camera
+camera :: CharParser Context Camera.Camera
 camera = pinholeCamera <|> orthographicCamera
 
-pinholeCamera :: CharParser () Camera.Camera
+pinholeCamera :: CharParser Context Camera.Camera
 pinholeCamera = do
   openBrace "PinholeCamera"
   eye <- field "eye" vector3
@@ -165,7 +183,7 @@ pinholeCamera = do
   closeBrace
   return $ Camera.mkPinhole eye lookAt up distance
 
-orthographicCamera :: CharParser () Camera.Camera
+orthographicCamera :: CharParser Context Camera.Camera
 orthographicCamera = do
   openBrace "OrthographicCamera"
   eye <- field "eye" vector3
@@ -174,52 +192,60 @@ orthographicCamera = do
   closeBrace
   return $ Camera.mkOrthographic eye lookAt up
 
-vector2 :: CharParser () Vector.Vector2
+vector2 :: CharParser Context Vector.Vector2
 vector2 = do
   string "Vector2"
   Vector.Vector2 <$> (spaces1 *> double) <*> (spaces1 *> double)
 
-vector3 :: CharParser () Vector.Vector3
+vector3 :: CharParser Context Vector.Vector3
 vector3 = do
   string "Vector3"
   Vector.Vector3 <$> (spaces1 *> double) <*> (spaces1 *> double) <*> (spaces1 *> double)
 
-color :: CharParser () Color.Color
+color :: CharParser Context Color.Color
 color = do
   string "RGB"
   Color.RGB <$> (spaces1 *> double) <*> (spaces1 *> double) <*> (spaces1 *> double)
 
-openBrace :: String -> CharParser () ()
+openBrace :: String -> CharParser Context ()
 openBrace name = string name *> spaces *> char '{' *> spaces
 
-closeBrace :: CharParser () ()
+closeBrace :: CharParser Context ()
 closeBrace = spaces *> char '}' *> spaces
 
-array :: CharParser () a -> CharParser () [a]
+array :: CharParser Context a -> CharParser Context [a]
 array f = char '[' *> spaces *> sepBy f fieldSep <* spaces <* char ']'
 
-field' :: String -> CharParser () a -> CharParser () a
+field' :: String -> CharParser Context a -> CharParser Context a
 field' name valueParser = fieldSep *> field name valueParser
 
-field :: String -> CharParser () a -> CharParser () a
+field :: String -> CharParser Context a -> CharParser Context a
 field name valueParser = string name *> spaces *> char '=' *> spaces *> valueParser
 
-fieldSep :: CharParser () ()
+fieldSep :: CharParser Context ()
 fieldSep = spaces *> char ',' *> spaces
 
-double :: CharParser () Double
+double :: CharParser Context Double
 double = do
   s <- getInput
   case readSigned readFloat s of
     [(n, s')] -> n <$ setInput s'
     _         -> empty
 
-int :: CharParser () Int
+int :: CharParser Context Int
 int = do
   s <- getInput
   case readSigned readDec s of
     [(n, s')] -> n <$ setInput s'
     _         -> empty
 
+spaces1 :: CharParser Context String
 spaces1 = many1 space
+
+takeRandomValues :: Int -> CharParser Context [Double]
+takeRandomValues n = do
+  context <- getState
+  let (values, rest) = splitAt n (randomValues context)
+  setState Context { randomValues = rest }
+  return values
 
