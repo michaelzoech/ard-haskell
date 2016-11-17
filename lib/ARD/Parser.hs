@@ -67,25 +67,33 @@ viewPlane = do
     }
 
 sampler :: CharParser Context Sampler.Sampler
-sampler = jittered <|> regular <|> standard
+sampler = jitteredSampler <|> randomSampler <|> regularSampler <|> standardSampler
 
-jittered :: CharParser Context Sampler.Sampler
-jittered = do
+jitteredSampler :: CharParser Context Sampler.Sampler
+jitteredSampler = do
   openBrace "Jittered"
   samplesPerAxis <- field "samplesPerAxis" int
   closeBrace
   rands <- takeRandomValues (samplesPerAxis*samplesPerAxis*2)
   return $ Sampler.mkJittered samplesPerAxis rands
 
-regular :: CharParser Context Sampler.Sampler
-regular = do
+randomSampler :: CharParser Context Sampler.Sampler
+randomSampler = do
+  openBrace "Random"
+  numSamples <- field "numSamples" int
+  closeBrace
+  rands <- takeRandomValues (numSamples*2)
+  return $ Sampler.mkRandom numSamples rands
+
+regularSampler :: CharParser Context Sampler.Sampler
+regularSampler = do
   openBrace "Regular"
   samplesPerAxis <- field "samplesPerAxis" int
   closeBrace
   return $ Sampler.mkRegular samplesPerAxis
 
-standard :: CharParser Context Sampler.Sampler
-standard = do
+standardSampler :: CharParser Context Sampler.Sampler
+standardSampler = do
   string "Standard"
   return Sampler.mkStandard
 
@@ -208,7 +216,7 @@ color = do
   Color.RGB <$> (spaces1 *> double) <*> (spaces1 *> double) <*> (spaces1 *> double)
 
 openBrace :: String -> CharParser Context ()
-openBrace name = string name *> spaces *> char '{' *> spaces
+openBrace name = try (string name) *> spaces *> char '{' *> spaces
 
 closeBrace :: CharParser Context ()
 closeBrace = spaces *> char '}' *> spaces
