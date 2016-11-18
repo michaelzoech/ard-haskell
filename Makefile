@@ -12,7 +12,7 @@ test:
 
 .PHONY: run
 run:
-	stack exec ard scenes/simple.scene
+	stack exec ard scenes/simple.ard
 
 .PHONY: clean
 clean:

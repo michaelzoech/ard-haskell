@@ -19,7 +19,7 @@ handle _ = usage die
 
 usage exit = do
   progName <- getProgName
-  putStrLn $ "USAGE: " ++ progName ++ " <path/to/file.scene>"
+  putStrLn $ "USAGE: " ++ progName ++ " <path/to/file.ard>"
   exit
 
 die = exitWith (ExitFailure 1)
