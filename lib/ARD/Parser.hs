@@ -77,32 +77,27 @@ pScene = do
 
 pBackgroundColor :: CharParser Context ()
 pBackgroundColor = do
-  try $ string "backgroundColor"
-  spaces1
+  try $ pSymbol "backgroundColor"
   color <- pColor
   spaces
   updateState $ \c -> c { backgroundColor = Just color }
 
 pRandom :: CharParser Context ()
 pRandom = do
-  try $ string "random"
-  spaces1
+  try $ pSymbol "random"
   seed <- pInt
   spaces
   updateState $ \c -> c { randomValues = randoms $ mkStdGen seed }
 
 pViewPlane :: CharParser Context ()
 pViewPlane = do
-  try $ string "viewplane"
-  spaces
-  char '{'
-  spaces
+  try $ pSymbol "viewplane"
+  pBraceOpen
   hres <- pField "horizontal" pInt
   vres <- pField "vertical" pInt
   pixelSize <- pField "pixelsize" pDouble
   sampler <- pField "sampler" pSampler
-  spaces
-  char '}'
+  pBraceClose
   updateState $ \c -> c { viewPlane = Just ViewPlane.ViewPlane
     { ViewPlane.horizontalResolution = hres
     , ViewPlane.verticalResolution = vres
@@ -113,10 +108,8 @@ pViewPlane = do
 
 pCamera :: CharParser Context ()
 pCamera = do
-  try $ string "camera"
-  spaces
-  char '{'
-  spaces
+  try $ pSymbol "camera"
+  pBraceOpen
   ctype <- try (pSymbol "orthographic") <|> try (pSymbol "pinhole")
   camera <- case ctype of
     "orthographic" -> do
@@ -130,21 +123,17 @@ pCamera = do
       up <- pField "up" pVector3
       distance <- pField "distance" pDouble
       return $ Camera.mkPinhole eye lookAt up distance
-  spaces
-  char '}'
+  pBraceClose
   updateState $ \c -> c { camera = Just camera }
 
 pSphere :: CharParser Context ()
 pSphere = do
-  try $ string "sphere"
-  spaces
-  char '{'
-  spaces
+  try $ pSymbol "sphere"
+  pBraceOpen
   center <- pField "center" pVector3
   radius <- pField "radius" pDouble
   material <- pField "material" pMaterial
-  spaces
-  char '}'
+  pBraceClose
   let
     sphere = World.SceneObject Sphere.Sphere
       { Sphere.center = center
@@ -155,15 +144,12 @@ pSphere = do
 
 pPlane :: CharParser Context ()
 pPlane = do
-  try $ string "plane"
-  spaces
-  char '{'
-  spaces
+  try $ pSymbol "plane"
+  pBraceOpen
   point <- pField "point" pVector3
   normal <- pField "normal" pVector3
   material <- pField "material" pMaterial
-  spaces
-  char '}'
+  pBraceClose
   let
     plane = World.SceneObject Plane.Plane
       { Plane.point = point
@@ -174,35 +160,29 @@ pPlane = do
 
 pMaterial :: CharParser Context Material.Material
 pMaterial = do
-  char '{'
-  spaces
+  pBraceOpen
   mtype <- try (pSymbol "matte") <|> try (pSymbol "phong")
   material <- case mtype of
     "matte" -> Material.mkMatte <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble
     "phong" -> Material.mkPhong <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble <*> pField "ks" pDouble <*> pField "exp" pDouble
-  spaces
-  char '}'
+  pBraceClose
   return material
 
 pLight :: CharParser Context ()
 pLight = do
-  try $ string "light"
-  spaces
-  char '{'
-  spaces
+  try $ pSymbol "light"
+  pBraceOpen
   ltype <- try (pSymbol "ambient") <|> try (pSymbol "directional") <|> try (pSymbol "point")
   light <- case ltype of
     "ambient" -> Light.mkAmbient <$> pField "color" pColor <*> pField "ls" pDouble
     "directional" -> Light.mkDirectional <$> pField "invertDirection" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
     "point" -> Light.mkPoint <$> pField "location" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
-  spaces
-  char '}'
+  pBraceClose
   updateState $ \c -> c{ lights = lights c ++ [light] }
 
 pSampler :: CharParser Context Sampler.Sampler
 pSampler = do
-  char '{'
-  spaces
+  pBraceOpen
   stype <- try (pSymbol "jittered") <|> try (pSymbol "random") <|> try (pSymbol "regular") <|> try (pSymbol "standard")
   sampler <- case stype of
     "jittered" -> do
@@ -215,8 +195,7 @@ pSampler = do
       return $ Sampler.mkRandom samples rands
     "regular" -> Sampler.mkRegular <$> pField "axis" pInt
     "standard" -> return Sampler.mkStandard
-  spaces
-  char '}'
+  pBraceClose
   return sampler
 
 pVector2 :: CharParser Context Vector.Vector2
@@ -229,19 +208,15 @@ pColor :: CharParser Context Color.Color
 pColor = Color.RGB <$> (spaces *> pDouble) <*> (spaces1 *> pDouble) <*> (spaces1 *> pDouble)
 
 pField :: String -> CharParser Context a -> CharParser Context a
-pField key valueParser = do
-  pSymbol key
-  value <- valueParser
-  spaces1
-  return value
+pField key valueParser = pSymbol key *> valueParser <* notFollowedBy alphaNum <* spaces
 
 pSymbol :: String -> CharParser Context String
-pSymbol symbol = string symbol <* spaces1
+pSymbol symbol = string symbol <* notFollowedBy alphaNum <* spaces
 
 pComment :: CharParser Context ()
 pComment = do
   char '#'
-  manyTill (noneOf "\r\n") (oneOf "\r\n")
+  manyTill (noneOf "\r\n") (void (oneOf "\r\n") <|> eof)
   many (oneOf "\r\n")
   return ()
 
@@ -258,6 +233,12 @@ pInt = do
   case readSigned readDec s of
     [(n, s')] -> n <$ setInput s'
     _         -> empty
+
+pBraceOpen :: CharParser Context ()
+pBraceOpen = char '{' >> spaces
+
+pBraceClose :: CharParser Context ()
+pBraceClose = char '}' >> spaces
 
 spaces1 :: CharParser Context String
 spaces1 = many1 space
