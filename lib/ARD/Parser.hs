@@ -1,4 +1,8 @@
-module ARD.Parser where
+module ARD.Parser
+  ( Context(..)
+  , parseScene
+  , parseWorld
+  ) where
 
 import qualified ARD.Camera as Camera
 import qualified ARD.Color as Color
@@ -12,236 +16,244 @@ import qualified ARD.Vector as Vector
 import qualified ARD.ViewPlane as ViewPlane
 import qualified ARD.World as World
 
-import Control.Applicative
+import Control.Applicative hiding (many, (<|>))
+import Control.Monad
+import qualified Data.Maybe as Maybe
 import Numeric (readDec, readFloat, readSigned)
 import System.Random
 import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
 import Text.ParserCombinators.Parsec.Char
 import Text.ParserCombinators.Parsec.Combinator
+import Text.ParserCombinators.Parsec.Prim
 
 data Context
   = Context
   { randomValues :: [Double]
+  , camera :: Maybe Camera.Camera
+  , viewPlane :: Maybe ViewPlane.ViewPlane
+  , sceneObjects :: [World.SceneObject]
+  , lights :: [Light.Light]
+  , backgroundColor :: Maybe Color.Color
   }
 
-parseWorld :: String -> String -> Either String World.World
-parseWorld sourceName input =
-  let
-    values = (randoms $ mkStdGen 0) :: [Double]
-    context = Context { randomValues = values }
-  in
-    case runParser (spaces *> world) context sourceName input of
-      Left err -> Left (show err)
-      Right w -> Right w
+eitherFromMaybe :: Maybe a -> b -> Either b a
+eitherFromMaybe Nothing b = Left b
+eitherFromMaybe (Just a) _ = Right a
 
-world :: CharParser Context World.World
-world = do
-  openBrace "World"
-  camera <- field "camera" camera
-  viewPlane <- field' "viewPlane" viewPlane
-  sceneObjects <- field' "sceneObjects" (array sceneObject)
-  lights <- field' "lights" (array light)
-  backgroundColor <- field' "backgroundColor" color
-  closeBrace
+parseWorld :: String -> String -> Either String World.World
+parseWorld sourceName input = do
+  context <- parseScene sourceName input
+  c <- eitherFromMaybe (camera context) "No camera in scene"
+  vp <- eitherFromMaybe (viewPlane context) "No view plane in scene"
   return World.World
-    { World.camera = camera
-    , World.viewPlane = viewPlane
-    , World.sceneObjects = sceneObjects
-    , World.lights = lights
-    , World.backgroundColor = backgroundColor
+    { World.camera = c
+    , World.viewPlane = vp
+    , World.sceneObjects = sceneObjects context
+    , World.lights = lights context
+    , World.backgroundColor = Maybe.fromMaybe (Color.RGB 0 0 0) (backgroundColor context)
     }
 
-viewPlane :: CharParser Context ViewPlane.ViewPlane
-viewPlane = do
-  openBrace "ViewPlane"
-  hres <- field "horizontalResolution" int
-  vres <- field' "verticalResolution" int
-  pixelSize <- field' "pixelSize" double
-  sampler <- field' "sampler" sampler
-  closeBrace
-  return ViewPlane.ViewPlane
+parseScene :: String -> String -> Either String Context
+parseScene sourceName input =
+  let
+    initialContext = Context
+      { randomValues = randoms $ mkStdGen 0
+      , camera = Nothing
+      , viewPlane = Nothing
+      , sceneObjects = []
+      , lights = []
+      , backgroundColor = Nothing
+      }
+  in
+    case runParser pScene initialContext sourceName input of
+      Left err -> Left $ show err
+      Right context -> Right context
+
+pScene :: CharParser Context Context
+pScene = do
+  spaces
+  manyTill ((pComment <|> pCamera <|> pViewPlane <|> pLight <|> pPlane <|> pSphere <|> pBackgroundColor <|> pRandom) <* spaces) (try eof)
+  getState
+
+pBackgroundColor :: CharParser Context ()
+pBackgroundColor = do
+  try $ string "backgroundColor"
+  spaces1
+  color <- pColor
+  spaces
+  updateState $ \c -> c { backgroundColor = Just color }
+
+pRandom :: CharParser Context ()
+pRandom = do
+  try $ string "random"
+  spaces1
+  seed <- pInt
+  spaces
+  updateState $ \c -> c { randomValues = randoms $ mkStdGen seed }
+
+pViewPlane :: CharParser Context ()
+pViewPlane = do
+  try $ string "viewplane"
+  spaces
+  char '{'
+  spaces
+  hres <- pField "horizontal" pInt
+  vres <- pField "vertical" pInt
+  pixelSize <- pField "pixelsize" pDouble
+  sampler <- pField "sampler" pSampler
+  spaces
+  char '}'
+  updateState $ \c -> c { viewPlane = Just ViewPlane.ViewPlane
     { ViewPlane.horizontalResolution = hres
     , ViewPlane.verticalResolution = vres
     , ViewPlane.pixelSize = pixelSize
     , ViewPlane.pixelSampler = sampler
     }
+  }
 
-sampler :: CharParser Context Sampler.Sampler
-sampler = jitteredSampler <|> randomSampler <|> regularSampler <|> standardSampler
+pCamera :: CharParser Context ()
+pCamera = do
+  try $ string "camera"
+  spaces
+  char '{'
+  spaces
+  ctype <- try (pSymbol "orthographic") <|> try (pSymbol "pinhole")
+  camera <- case ctype of
+    "orthographic" -> do
+      eye <- pField "eye" pVector3
+      lookAt <- pField "lookAt" pVector3
+      up <- pField "up" pVector3
+      return $ Camera.mkOrthographic eye lookAt up
+    "pinhole" -> do
+      eye <- pField "eye" pVector3
+      lookAt <- pField "lookAt" pVector3
+      up <- pField "up" pVector3
+      distance <- pField "distance" pDouble
+      return $ Camera.mkPinhole eye lookAt up distance
+  spaces
+  char '}'
+  updateState $ \c -> c { camera = Just camera }
 
-jitteredSampler :: CharParser Context Sampler.Sampler
-jitteredSampler = do
-  openBrace "Jittered"
-  samplesPerAxis <- field "samplesPerAxis" int
-  closeBrace
-  rands <- takeRandomValues (samplesPerAxis*samplesPerAxis*2)
-  return $ Sampler.mkJittered samplesPerAxis rands
+pSphere :: CharParser Context ()
+pSphere = do
+  try $ string "sphere"
+  spaces
+  char '{'
+  spaces
+  center <- pField "center" pVector3
+  radius <- pField "radius" pDouble
+  material <- pField "material" pMaterial
+  spaces
+  char '}'
+  let
+    sphere = World.SceneObject Sphere.Sphere
+      { Sphere.center = center
+      , Sphere.radius = radius
+      , Sphere.material = material
+      }
+  updateState $ \c -> c { sceneObjects = sceneObjects c ++ [sphere] }
 
-randomSampler :: CharParser Context Sampler.Sampler
-randomSampler = do
-  openBrace "Random"
-  numSamples <- field "numSamples" int
-  closeBrace
-  rands <- takeRandomValues (numSamples*2)
-  return $ Sampler.mkRandom numSamples rands
+pPlane :: CharParser Context ()
+pPlane = do
+  try $ string "plane"
+  spaces
+  char '{'
+  spaces
+  point <- pField "point" pVector3
+  normal <- pField "normal" pVector3
+  material <- pField "material" pMaterial
+  spaces
+  char '}'
+  let
+    plane = World.SceneObject Plane.Plane
+      { Plane.point = point
+      , Plane.normal = normal
+      , Plane.material = material
+      }
+  updateState $ \c -> c { sceneObjects = sceneObjects c ++ [plane] }
 
-regularSampler :: CharParser Context Sampler.Sampler
-regularSampler = do
-  openBrace "Regular"
-  samplesPerAxis <- field "samplesPerAxis" int
-  closeBrace
-  return $ Sampler.mkRegular samplesPerAxis
+pMaterial :: CharParser Context Material.Material
+pMaterial = do
+  char '{'
+  spaces
+  mtype <- try (pSymbol "matte") <|> try (pSymbol "phong")
+  material <- case mtype of
+    "matte" -> Material.mkMatte <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble
+    "phong" -> Material.mkPhong <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble <*> pField "ks" pDouble <*> pField "exp" pDouble
+  spaces
+  char '}'
+  return material
 
-standardSampler :: CharParser Context Sampler.Sampler
-standardSampler = do
-  string "Standard"
-  return Sampler.mkStandard
+pLight :: CharParser Context ()
+pLight = do
+  try $ string "light"
+  spaces
+  char '{'
+  spaces
+  ltype <- try (pSymbol "ambient") <|> try (pSymbol "directional") <|> try (pSymbol "point")
+  light <- case ltype of
+    "ambient" -> Light.mkAmbient <$> pField "color" pColor <*> pField "ls" pDouble
+    "directional" -> Light.mkDirectional <$> pField "invertDirection" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
+    "point" -> Light.mkPoint <$> pField "location" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
+  spaces
+  char '}'
+  updateState $ \c -> c{ lights = lights c ++ [light] }
 
-light :: CharParser Context Light.Light
-light = ambientLight <|> directionalLight <|> pointLight
+pSampler :: CharParser Context Sampler.Sampler
+pSampler = do
+  char '{'
+  spaces
+  stype <- try (pSymbol "jittered") <|> try (pSymbol "random") <|> try (pSymbol "regular") <|> try (pSymbol "standard")
+  sampler <- case stype of
+    "jittered" -> do
+      axis <- pField "axis" pInt
+      rands <- takeRandomValues (axis*axis*2)
+      return $ Sampler.mkJittered axis rands
+    "random" -> do
+      samples <- pField "samples" pInt
+      rands <- takeRandomValues (samples*2)
+      return $ Sampler.mkRandom samples rands
+    "regular" -> Sampler.mkRegular <$> pField "axis" pInt
+    "standard" -> return Sampler.mkStandard
+  spaces
+  char '}'
+  return sampler
 
-ambientLight :: CharParser Context Light.Light
-ambientLight = do
-  openBrace "AmbientLight"
-  color <- field "color" color
-  ls <- field' "ls" double
-  closeBrace
-  return $ Light.mkAmbient color ls
+pVector2 :: CharParser Context Vector.Vector2
+pVector2 = Vector.Vector2 <$> (spaces *> pDouble) <*> (spaces1 *> pDouble)
 
-directionalLight :: CharParser Context Light.Light
-directionalLight = do
-  openBrace "DirectionalLight"
-  invDir <- field "invertDirection" vector3
-  color <- field' "color" color
-  ls <- field' "ls" double
-  closeBrace
-  return $ Light.mkDirectional invDir color ls
+pVector3 :: CharParser Context Vector.Vector3
+pVector3 = Vector.Vector3 <$> (spaces *> pDouble) <*> (spaces1 *> pDouble) <*> (spaces1 *> pDouble)
 
-pointLight :: CharParser Context Light.Light
-pointLight = do
-  openBrace "PointLight"
-  location <- field "location" vector3
-  color <- field' "color" color
-  ls <- field' "ls" double
-  closeBrace
-  return $ Light.mkPoint location color ls
+pColor :: CharParser Context Color.Color
+pColor = Color.RGB <$> (spaces *> pDouble) <*> (spaces1 *> pDouble) <*> (spaces1 *> pDouble)
 
-sceneObject :: CharParser Context World.SceneObject
-sceneObject = sphere <|> plane
+pField :: String -> CharParser Context a -> CharParser Context a
+pField key valueParser = do
+  pSymbol key
+  value <- valueParser
+  spaces1
+  return value
 
-sphere :: CharParser Context World.SceneObject
-sphere = do
-  openBrace "Sphere"
-  center <- field "center" vector3
-  radius <- field' "radius" double
-  material <- field' "material" material
-  closeBrace
-  return $ World.SceneObject Sphere.Sphere
-    { Sphere.center = center
-    , Sphere.radius = radius
-    , Sphere.material = material
-    }
+pSymbol :: String -> CharParser Context String
+pSymbol symbol = string symbol <* spaces1
 
-plane :: CharParser Context World.SceneObject
-plane = do
-  openBrace "Plane"
-  point <- field "point" vector3
-  normal <- field' "normal" vector3
-  material <- field' "material" material
-  closeBrace
-  return $ World.SceneObject Plane.Plane
-    { Plane.point = point
-    , Plane.normal = normal
-    , Plane.material = material
-    }
+pComment :: CharParser Context ()
+pComment = do
+  char '#'
+  manyTill (noneOf "\r\n") (oneOf "\r\n")
+  many (oneOf "\r\n")
+  return ()
 
-material :: CharParser Context Material.Material
-material = matte <|> phong
-
-matte :: CharParser Context Material.Material
-matte = do
-  openBrace "Matte"
-  cd <- field "cd" color
-  kd <- field' "kd" double
-  ka <- field' "ka" double
-  closeBrace
-  return $ Material.mkMatte cd kd ka
-
-phong :: CharParser Context Material.Material
-phong = do
-  openBrace "Phong"
-  cd <- field "cd" color
-  kd <- field' "kd" double
-  ka <- field' "ka" double
-  ks <- field' "ks" double
-  exp <- field' "exp" double
-  closeBrace
-  return $ Material.mkPhong cd kd ka ks exp
-
-camera :: CharParser Context Camera.Camera
-camera = pinholeCamera <|> orthographicCamera
-
-pinholeCamera :: CharParser Context Camera.Camera
-pinholeCamera = do
-  openBrace "PinholeCamera"
-  eye <- field "eye" vector3
-  lookAt <- field' "lookAt" vector3
-  up <- field' "up" vector3
-  distance <- field' "distance" double
-  closeBrace
-  return $ Camera.mkPinhole eye lookAt up distance
-
-orthographicCamera :: CharParser Context Camera.Camera
-orthographicCamera = do
-  openBrace "OrthographicCamera"
-  eye <- field "eye" vector3
-  lookAt <- field' "lookAt" vector3
-  up <- field' "up" vector3
-  closeBrace
-  return $ Camera.mkOrthographic eye lookAt up
-
-vector2 :: CharParser Context Vector.Vector2
-vector2 = do
-  string "Vector2"
-  Vector.Vector2 <$> (spaces1 *> double) <*> (spaces1 *> double)
-
-vector3 :: CharParser Context Vector.Vector3
-vector3 = do
-  string "Vector3"
-  Vector.Vector3 <$> (spaces1 *> double) <*> (spaces1 *> double) <*> (spaces1 *> double)
-
-color :: CharParser Context Color.Color
-color = do
-  string "RGB"
-  Color.RGB <$> (spaces1 *> double) <*> (spaces1 *> double) <*> (spaces1 *> double)
-
-openBrace :: String -> CharParser Context ()
-openBrace name = try (string name) *> spaces *> char '{' *> spaces
-
-closeBrace :: CharParser Context ()
-closeBrace = spaces *> char '}' *> spaces
-
-array :: CharParser Context a -> CharParser Context [a]
-array f = char '[' *> spaces *> sepBy f fieldSep <* spaces <* char ']'
-
-field' :: String -> CharParser Context a -> CharParser Context a
-field' name valueParser = fieldSep *> field name valueParser
-
-field :: String -> CharParser Context a -> CharParser Context a
-field name valueParser = string name *> spaces *> char '=' *> spaces *> valueParser
-
-fieldSep :: CharParser Context ()
-fieldSep = spaces *> char ',' *> spaces
-
-double :: CharParser Context Double
-double = do
+pDouble :: CharParser Context Double
+pDouble = do
   s <- getInput
   case readSigned readFloat s of
     [(n, s')] -> n <$ setInput s'
     _         -> empty
 
-int :: CharParser Context Int
-int = do
+pInt :: CharParser Context Int
+pInt = do
   s <- getInput
   case readSigned readDec s of
     [(n, s')] -> n <$ setInput s'
@@ -254,6 +266,6 @@ takeRandomValues :: Int -> CharParser Context [Double]
 takeRandomValues n = do
   context <- getState
   let (values, rest) = splitAt n (randomValues context)
-  setState Context { randomValues = rest }
+  setState context { randomValues = rest }
   return values
 
