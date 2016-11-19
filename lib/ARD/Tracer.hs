@@ -26,7 +26,8 @@ traceScene world =
     resX = fromIntegral width
     resY = fromIntegral height
     ps = pixelSize vp
-    samples = unitSquareSamples $ pixelSampler vp
+    sampler = pixelSampler vp
+    samples = unitSquareSamples sampler
     xy = [ (fromIntegral x, fromIntegral y) | y <- [0..height-1], x <- [0..width-1] ]
     direction = Vector3 0 0 (-1)
     raysPerPixel = [ generateRays samples x y | (x,y) <- xy ]
@@ -34,7 +35,7 @@ traceScene world =
     generateRays samples x y = map (\(Vector2 x' y') -> generateRay cam (Vector2 (pixelPos x x' resX) (pixelPos y y' resY))) samples
     colors = map (tracePixel world) raysPerPixel
   in
-    colors `P.using` P.parListChunk height P.rpar
+    colors `P.using` P.parListChunk width P.rdeepseq
 
 tracePixel :: World -> [Ray] -> Color
 tracePixel world rays =

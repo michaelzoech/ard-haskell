@@ -1,12 +1,15 @@
+{-# LANGUAGE DeriveGeneric, DeriveAnyClass #-}
 module ARD.Color where
 
+import Control.DeepSeq (NFData)
 import Data.Bits
 import Data.Word
+import GHC.Generics (Generic)
 import Prelude hiding (div)
 
 data Color
   = RGB !Double !Double !Double
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic, NFData)
 
 instance Num Color where
   (+) (RGB r g b) (RGB r' g' b') = RGB (r+r') (g+g') (b+b')
