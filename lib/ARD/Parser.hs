@@ -1,5 +1,6 @@
 module ARD.Parser
   ( Context(..)
+  , Globals(..)
   , parseScene
   , parseWorld
   ) where
@@ -18,13 +19,22 @@ import qualified ARD.World as World
 
 import Control.Applicative hiding (many, (<|>))
 import Control.Monad
+import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
+import qualified Data.Set as Set
 import Numeric (readDec, readFloat, readSigned)
 import System.Random
 import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
 import Text.ParserCombinators.Parsec.Char
 import Text.ParserCombinators.Parsec.Combinator
 import Text.ParserCombinators.Parsec.Prim
+
+data Globals
+  = Globals
+  { globalNames :: Set.Set String
+  , globalColors :: Map.Map String Color.Color
+  , globalMaterials :: Map.Map String Material.Material
+  }
 
 data Context
   = Context
@@ -34,6 +44,7 @@ data Context
   , sceneObjects :: [World.SceneObject]
   , lights :: [Light.Light]
   , backgroundColor :: Maybe Color.Color
+  , globals :: Globals
   }
 
 eitherFromMaybe :: Maybe a -> b -> Either b a
@@ -63,6 +74,11 @@ parseScene sourceName input =
       , sceneObjects = []
       , lights = []
       , backgroundColor = Nothing
+      , globals = Globals
+        { globalNames = Set.empty
+        , globalColors = Map.empty
+        , globalMaterials = Map.empty
+        }
       }
   in
     case runParser pScene initialContext sourceName input of
@@ -72,8 +88,37 @@ parseScene sourceName input =
 pScene :: CharParser Context Context
 pScene = do
   spaces
-  manyTill ((pComment <|> pCamera <|> pViewPlane <|> pLight <|> pPlane <|> pSphere <|> pBackgroundColor <|> pRandom) <* spaces) (try eof)
+  manyTill ((pComment <|> pLet <|> pCamera <|> pViewPlane <|> pLight <|> pPlane <|> pSphere <|> pBackgroundColor <|> pRandom) <* spaces) (try eof)
   getState
+
+pLet :: CharParser Context ()
+pLet = do
+  try $ pSymbol "let"
+  name <- pIdentifier
+  context <- getState
+  if Set.member name (globalNames $ globals context) then
+    fail ("Reference with name '" ++ name ++ "' already declared")
+  else do
+    updateGlobals $ \g -> g { globalNames = Set.insert name (globalNames g) }
+    spaces
+    char '='
+    spaces
+    pGlobalMaterial name <|> pGlobalColor name
+
+pGlobalMaterial :: String -> CharParser Context ()
+pGlobalMaterial name = do
+  try $ pSymbol "material"
+  material <- pMaterialBlock
+  updateGlobals $ \g -> g { globalMaterials = Map.insert name material (globalMaterials g) }
+
+pGlobalColor :: String -> CharParser Context ()
+pGlobalColor name = do
+  try $ pSymbol "color"
+  color <- pColorBlock
+  updateGlobals $ \g -> g { globalColors = Map.insert name color (globalColors g) }
+
+updateGlobals :: (Globals -> Globals) -> CharParser Context ()
+updateGlobals f = updateState $ \c -> c { globals = f (globals c) }
 
 pBackgroundColor :: CharParser Context ()
 pBackgroundColor = do
@@ -159,8 +204,11 @@ pPlane = do
   updateState $ \c -> c { sceneObjects = sceneObjects c ++ [plane] }
 
 pMaterial :: CharParser Context Material.Material
-pMaterial = do
-  pBraceOpen
+pMaterial = pReference globalMaterials <|> pMaterialBlock
+
+pMaterialBlock :: CharParser Context Material.Material
+pMaterialBlock = do
+  try pBraceOpen
   mtype <- try (pSymbol "matte") <|> try (pSymbol "phong")
   material <- case mtype of
     "matte" -> Material.mkMatte <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble
@@ -205,13 +253,30 @@ pVector3 :: CharParser Context Vector.Vector3
 pVector3 = Vector.Vector3 <$> (spaces *> pDouble) <*> (spaces1 *> pDouble) <*> (spaces1 *> pDouble)
 
 pColor :: CharParser Context Color.Color
-pColor = Color.RGB <$> (spaces *> pDouble) <*> (spaces1 *> pDouble) <*> (spaces1 *> pDouble)
+pColor =  pReference globalColors <|> pColorBlock
+
+pColorBlock :: CharParser Context Color.Color
+pColorBlock = Color.RGB <$> (spaces *> pDouble) <*> (spaces1 *> pDouble) <*> (spaces1 *> pDouble)
+
+pReference :: (Globals -> Map.Map String a) -> CharParser Context a
+pReference f = do
+  name <- try pIdentifier
+  context <- getState
+  case Map.lookup name $ f $ globals context of
+    Just m -> return m
+    _ -> fail ("Reference with name '" ++ name ++ "' but global not found")
 
 pField :: String -> CharParser Context a -> CharParser Context a
 pField key valueParser = pSymbol key *> valueParser <* notFollowedBy alphaNum <* spaces
 
 pSymbol :: String -> CharParser Context String
 pSymbol symbol = string symbol <* notFollowedBy alphaNum <* spaces
+
+pIdentifier :: CharParser Context String
+pIdentifier = do
+  first <- letter <|> char '_'
+  rest <- many (alphaNum <|> char '_')
+  return (first:rest)
 
 pComment :: CharParser Context ()
 pComment = do

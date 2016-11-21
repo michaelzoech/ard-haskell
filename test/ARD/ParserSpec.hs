@@ -42,6 +42,27 @@ spec = describe "Parser" $ do
     pFail "light{ambientcolor 0 0 0 ls 1}"
   it "needs space after value" $
     pFail "light{ambient color 0 0 0ls 1}"
+  it "let statement with material and color" $ do
+    let
+      input =
+        "let mat = material { matte cd 1 1 1 kd 1 ka 1 }\n\
+        \let col = color 0 0 0\n\
+        \sphere { center 0 0 0 radius 1 material mat }"
+    context <- pSuccess input
+    let
+      objects = Parser.sceneObjects context
+      globals = Parser.globals context
+      globalColors = Parser.globalColors globals
+      globalMaterials = Parser.globalMaterials globals
+    length globalColors `shouldBe` 1
+    length globalMaterials `shouldBe` 1
+    length objects `shouldBe` 1
+  it "disallows declaring name twice" $ do
+    let
+      input =
+        "let m = color 0 1 0\n\
+        \let m = material { matte cd 1 1 1 kd 1 ka 1 }\n"
+    pFail input
 
 pSuccess :: String -> IO Parser.Context
 pSuccess input =
