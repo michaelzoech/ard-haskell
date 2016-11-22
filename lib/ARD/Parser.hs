@@ -11,6 +11,7 @@ import qualified ARD.Geometric as Geometric
 import qualified ARD.Light as Light
 import qualified ARD.Material as Material
 import qualified ARD.Plane as Plane
+import qualified ARD.Randomize as Randomize
 import qualified ARD.Sampler as Sampler
 import qualified ARD.Sphere as Sphere
 import qualified ARD.Vector as Vector
@@ -23,7 +24,6 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Set as Set
 import Numeric (readDec, readFloat, readSigned)
-import System.Random
 import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
 import Text.ParserCombinators.Parsec.Char
 import Text.ParserCombinators.Parsec.Combinator
@@ -38,7 +38,7 @@ data Globals
 
 data Context
   = Context
-  { randomValues :: [Double]
+  { randomState :: Randomize.Random
   , camera :: Maybe Camera.Camera
   , viewPlane :: Maybe ViewPlane.ViewPlane
   , sceneObjects :: [World.SceneObject]
@@ -68,7 +68,7 @@ parseScene :: String -> String -> Either String Context
 parseScene sourceName input =
   let
     initialContext = Context
-      { randomValues = randoms $ mkStdGen 0
+      { randomState = Randomize.mkRandomState 0
       , camera = Nothing
       , viewPlane = Nothing
       , sceneObjects = []
@@ -132,7 +132,7 @@ pRandom = do
   try $ pSymbol "random"
   seed <- pInt
   spaces
-  updateState $ \c -> c { randomValues = randoms $ mkStdGen seed }
+  updateState $ \c -> c { randomState = Randomize.mkRandomState seed }
 
 pViewPlane :: CharParser Context ()
 pViewPlane = do
@@ -235,12 +235,20 @@ pSampler = do
   sampler <- case stype of
     "jittered" -> do
       axis <- pField "axis" pInt
-      rands <- takeRandomValues (axis*axis*2)
-      return $ Sampler.mkJittered axis rands
+      context <- getState
+      let
+        r = randomState context
+        (sampler,r') = Randomize.runRandomized (Sampler.mkJittered axis) r
+      updateState $ \c -> c { randomState = r' }
+      return sampler
     "random" -> do
       samples <- pField "samples" pInt
-      rands <- takeRandomValues (samples*2)
-      return $ Sampler.mkRandom samples rands
+      context <- getState
+      let
+        r = randomState context
+        (sampler, r') = Randomize.runRandomized (Sampler.mkRandom samples) r
+      updateState $ \c -> c { randomState = r' }
+      return sampler
     "regular" -> Sampler.mkRegular <$> pField "axis" pInt
     "standard" -> return Sampler.mkStandard
   pBraceClose
@@ -307,11 +315,4 @@ pBraceClose = char '}' >> spaces
 
 spaces1 :: CharParser Context String
 spaces1 = many1 space
-
-takeRandomValues :: Int -> CharParser Context [Double]
-takeRandomValues n = do
-  context <- getState
-  let (values, rest) = splitAt n (randomValues context)
-  setState context { randomValues = rest }
-  return values
 

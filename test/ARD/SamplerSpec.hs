@@ -1,5 +1,6 @@
 module ARD.SamplerSpec where
 
+import ARD.Randomize
 import ARD.Sampler
 import ARD.Vector
 
@@ -12,13 +13,16 @@ spec = describe "Sampler" $ do
   randomSamplerSpec
   regularSamplerSpec
 
+randomSampler :: [Double] -> Randomize Sampler -> Sampler
+randomSampler rs samplerFunc = fst $ runRandomized samplerFunc (mkRandomState' [] rs)
+
 jitteredSamplerSpec :: Spec
 jitteredSamplerSpec = describe "JitteredSampler" $ do
   it "with non-random values matches RegularSampler" $
-    mkJittered 2 [0.5,0.5..] `shouldBe` mkRegular 2
+    randomSampler [0.5,0.5..] (mkJittered 2) `shouldBe` mkRegular 2
   it "uses given list to jitter points" $ do
-    unitSquareSamples (mkJittered 2 [0,0..]) `shouldBe` [Vector2 0 0, Vector2 0.5 0, Vector2 0 0.5, Vector2 0.5 0.5]
-    unitSquareSamples (mkJittered 2 [1,1..]) `shouldBe` [Vector2 0.5 0.5, Vector2 1 0.5, Vector2 0.5 1, Vector2 1 1]
+    unitSquareSamples (randomSampler [0,0..] (mkJittered 2)) `shouldBe` [Vector2 0 0, Vector2 0.5 0, Vector2 0 0.5, Vector2 0.5 0.5]
+    unitSquareSamples (randomSampler [1,1..] (mkJittered 2)) `shouldBe` [Vector2 0.5 0.5, Vector2 1 0.5, Vector2 0.5 1, Vector2 1 1]
 
 standardSamplerSpec :: Spec
 standardSamplerSpec = describe "StandardSampler" $
@@ -31,10 +35,10 @@ standardSamplerSpec = describe "StandardSampler" $
 randomSamplerSpec :: Spec
 randomSamplerSpec = describe "RandomSampler" $ do
   it "has given number of samples" $ do
-    numSamples (mkRandom 2 [0..]) `shouldBe` 2
-    numSamples (mkRandom 3 [0..]) `shouldBe` 3
+    numSamples (randomSampler [0..] (mkRandom 2)) `shouldBe` 2
+    numSamples (randomSampler [0..] (mkRandom 3)) `shouldBe` 3
   it "uses given list to generate samples" $
-    unitSquareSamples (mkRandom 2 [0..4]) `shouldNotBe` unitSquareSamples (mkRandom 2 [1..5])
+    unitSquareSamples (randomSampler [0..4] (mkRandom 2)) `shouldNotBe` unitSquareSamples (randomSampler [1..5] (mkRandom 2))
 
 regularSamplerSpec :: Spec
 regularSamplerSpec = describe "RegularSampler" $ do

@@ -6,6 +6,7 @@ import ARD.Camera
 import ARD.Color
 import ARD.Geometric as G
 import ARD.Material
+import ARD.Randomize
 import ARD.Ray
 import ARD.Sampler
 import ARD.Vector as Vector

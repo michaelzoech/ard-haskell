@@ -6,7 +6,10 @@ module ARD.Sampler
   , mkStandard
   ) where
 
+import ARD.Randomize
 import ARD.Vector
+import Control.Monad
+import Control.Monad.State
 
 data Sampler
   = Sampler
@@ -15,8 +18,9 @@ data Sampler
   , hemisphereSamples :: [Vector3]
   } deriving (Eq, Show)
 
-mkJittered :: Int -> [Double] -> Sampler
-mkJittered samplesPerAxis randoms =
+mkJittered :: Int -> Randomize Sampler
+mkJittered samplesPerAxis = do
+  randoms <- getRandoms (samplesPerAxis*samplesPerAxis*2)
   let
     n = fromIntegral samplesPerAxis
     invN = 1 / n
@@ -24,19 +28,18 @@ mkJittered samplesPerAxis randoms =
     unscaledSamples = [ (x,y) | y <- points, x <- points ]
     randomPairs = mapAdjacent (,) randoms
     samples = map (\((x,y),(a,b)) -> Vector2 ((x+a)*invN) ((y+b)*invN) ) $ zip unscaledSamples randomPairs
-  in
-    Sampler
+  return Sampler
       { numSamples = samplesPerAxis * samplesPerAxis
       , unitSquareSamples = samples
       , hemisphereSamples = map (unitSquareSampleToHemisphereSample 2) samples
       }
 
-mkRandom :: Int -> [Double] -> Sampler
-mkRandom numSamples randoms =
+mkRandom :: Int -> Randomize Sampler
+mkRandom numSamples = do
+  randoms <- getRandoms (numSamples*2)
   let
     samples = take numSamples $ mapAdjacent Vector2 randoms
-  in
-    Sampler
+  return Sampler
       { numSamples = numSamples
       , unitSquareSamples = samples
       , hemisphereSamples = map (unitSquareSampleToHemisphereSample 2) samples
