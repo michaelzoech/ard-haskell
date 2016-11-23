@@ -249,7 +249,14 @@ pSampler = do
         (sampler, r') = Randomize.runRandomized (Sampler.mkRandom samples) r
       updateState $ \c -> c { randomState = r' }
       return sampler
-    "regular" -> Sampler.mkRegular <$> pField "axis" pInt
+    "regular" -> do
+      axis <- pField "axis" pInt
+      context <- getState
+      let
+        r = randomState context
+        (sampler, r') = Randomize.runRandomized (Sampler.mkRegular axis) r
+      updateState $ \c -> c { randomState = r' }
+      return sampler
     "standard" -> return Sampler.mkStandard
   pBraceClose
   return sampler

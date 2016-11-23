@@ -14,53 +14,70 @@ import Control.Monad.State
 data Sampler
   = Sampler
   { numSamples :: Int
-  , unitSquareSamples :: [Point2]
-  , hemisphereSamples :: [Vector3]
+  , numSets :: Int
+  , unitSquareSamples :: [[Point2]]
+  , hemisphereSamples :: [[Vector3]]
   } deriving (Eq, Show)
 
 mkJittered :: Int -> Randomize Sampler
 mkJittered samplesPerAxis = do
-  randoms <- getRandoms (samplesPerAxis*samplesPerAxis*2)
-  let
-    n = fromIntegral samplesPerAxis
-    invN = 1 / n
-    points = [0..n-1]
-    unscaledSamples = [ (x,y) | y <- points, x <- points ]
-    randomPairs = mapAdjacent (,) randoms
-    samples = map (\((x,y),(a,b)) -> Vector2 ((x+a)*invN) ((y+b)*invN) ) $ zip unscaledSamples randomPairs
+  sets <- replicateM defaultNumSets $ do
+    randoms <- getRandoms (samplesPerAxis*samplesPerAxis*2)
+    let
+      n = fromIntegral samplesPerAxis
+      invN = 1 / n
+      points = [0..n-1]
+      unscaledSamples = [ (x,y) | y <- points, x <- points ]
+      randomPairs = mapAdjacent (,) randoms
+      samples = map (\((x,y),(a,b)) -> Vector2 ((x+a)*invN) ((y+b)*invN) ) $ zip unscaledSamples randomPairs
+    shuffle samples
   return Sampler
       { numSamples = samplesPerAxis * samplesPerAxis
-      , unitSquareSamples = samples
-      , hemisphereSamples = map (unitSquareSampleToHemisphereSample 2) samples
+      , numSets = defaultNumSets
+      , unitSquareSamples = sets
+      , hemisphereSamples = (map .map) (unitSquareSampleToHemisphereSample 2) sets
       }
 
 mkRandom :: Int -> Randomize Sampler
 mkRandom numSamples = do
-  randoms <- getRandoms (numSamples*2)
-  let
-    samples = take numSamples $ mapAdjacent Vector2 randoms
+  sets <- replicateM defaultNumSets $ do
+    randoms <- getRandoms (numSamples*2)
+    return $ take numSamples $ mapAdjacent Vector2 randoms
   return Sampler
       { numSamples = numSamples
-      , unitSquareSamples = samples
-      , hemisphereSamples = map (unitSquareSampleToHemisphereSample 2) samples
+      , numSets = defaultNumSets
+      , unitSquareSamples = sets
+      , hemisphereSamples = (map . map) (unitSquareSampleToHemisphereSample 2) sets
       }
 
-mkRegular :: Int -> Sampler
-mkRegular samplesPerAxis =
+mkRegular :: Int -> Randomize Sampler
+mkRegular samplesPerAxis = do
   let
     n = fromIntegral samplesPerAxis
     invN = 1 / n
     points = map (*invN) [0.5..n-1]
     samples = [ Vector2 x y | y <- points, x <- points ]
-  in
-    Sampler (samplesPerAxis*samplesPerAxis) samples (map (unitSquareSampleToHemisphereSample 2) samples)
+  sets <- replicateM defaultNumSets (shuffle samples)
+  return Sampler
+      { numSamples = samplesPerAxis*samplesPerAxis
+      , numSets = defaultNumSets
+      , unitSquareSamples = sets
+      , hemisphereSamples = (map . map) (unitSquareSampleToHemisphereSample 2) sets
+      }
 
 mkStandard :: Sampler
 mkStandard =
   let
     samples = [Vector2 0.5 0.5]
   in
-    Sampler 1 samples (map (unitSquareSampleToHemisphereSample 2) samples)
+    Sampler
+      { numSamples = 1
+      , numSets = 1
+      , unitSquareSamples = [samples]
+      , hemisphereSamples = [map (unitSquareSampleToHemisphereSample 2) samples]
+      }
+
+defaultNumSets = 83
 
 mapAdjacent :: (a -> a -> b) -> [a] -> [b]
 mapAdjacent f (x:y:zs) = f x y : mapAdjacent f zs

@@ -5,10 +5,12 @@ module ARD.Randomize
   , Randomize
   , RandomValue(..)
   , runRandomized
+  , shuffle
   ) where
 
 import Control.Monad
 import Control.Monad.State
+import qualified Data.List as List
 import qualified System.Random as R
 
 data Random
@@ -20,11 +22,11 @@ data Random
 type Randomize a = State Random a
 
 class RandomValue a where
+  getRandoms :: Int -> Randomize [a]
   getRandom :: Randomize a
   getRandom = do
     r <- getRandoms 1
     return (head r)
-  getRandoms :: Int -> Randomize [a]
 
 instance RandomValue Double where
   getRandoms n = do
@@ -61,4 +63,9 @@ mkRandomState' ints doubles =
 
 runRandomized :: Randomize a -> Random -> (a, Random)
 runRandomized = runState
+
+shuffle :: [a] -> Randomize [a]
+shuffle xs = do
+  list <- getRandoms (length xs) :: Randomize [Int]
+  return $ map snd $ List.sortOn fst (zip list xs)
 
