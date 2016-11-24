@@ -55,9 +55,8 @@ light { point location  70 50 100 color white ls 1 }
 light { point location -70 50 100 color white ls 1 }
 
 ambientLight {
-  directional
-  invertDirection 0 1 0
+  ambient
   color white
-  ls 0.8
+  ls 0.6
 }
 
