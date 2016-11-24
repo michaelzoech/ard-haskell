@@ -62,6 +62,7 @@ parseWorld sourceName input = do
     , World.sceneObjects = sceneObjects context
     , World.lights = lights context
     , World.backgroundColor = Maybe.fromMaybe (Color.RGB 0 0 0) (backgroundColor context)
+    , World.randomState = randomState context
     }
 
 parseScene :: String -> String -> Either String Context

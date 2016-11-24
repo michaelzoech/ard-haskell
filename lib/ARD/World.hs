@@ -6,6 +6,7 @@ import ARD.Camera
 import ARD.Color
 import ARD.Geometric as G
 import ARD.Light
+import ARD.Randomize
 import ARD.Ray
 import ARD.ViewPlane
 
@@ -22,5 +23,6 @@ data World
   , sceneObjects :: [SceneObject]
   , lights :: [Light]
   , backgroundColor :: Color
+  , randomState :: Random
   }
 
