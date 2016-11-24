@@ -117,9 +117,6 @@ pGlobalColor name = do
   color <- pColorBlock
   updateGlobals $ \g -> g { globalColors = Map.insert name color (globalColors g) }
 
-updateGlobals :: (Globals -> Globals) -> CharParser Context ()
-updateGlobals f = updateState $ \c -> c { globals = f (globals c) }
-
 pBackgroundColor :: CharParser Context ()
 pBackgroundColor = do
   try $ pSymbol "backgroundColor"
@@ -235,29 +232,14 @@ pSampler = do
   sampler <- case stype of
     "jittered" -> do
       axis <- pField "axis" pInt
-      context <- getState
-      let
-        r = randomState context
-        (sampler,r') = Randomize.runRandomized (Sampler.mkJittered axis) r
-      updateState $ \c -> c { randomState = r' }
-      return sampler
+      randomizeFromContext (Sampler.mkJittered axis)
     "random" -> do
       samples <- pField "samples" pInt
-      context <- getState
-      let
-        r = randomState context
-        (sampler, r') = Randomize.runRandomized (Sampler.mkRandom samples) r
-      updateState $ \c -> c { randomState = r' }
-      return sampler
+      randomizeFromContext (Sampler.mkRandom samples)
     "regular" -> do
       axis <- pField "axis" pInt
-      context <- getState
-      let
-        r = randomState context
-        (sampler, r') = Randomize.runRandomized (Sampler.mkRegular axis) r
-      updateState $ \c -> c { randomState = r' }
-      return sampler
-    "standard" -> return Sampler.mkStandard
+      randomizeFromContext (Sampler.mkRegular axis)
+    "standard" -> randomizeFromContext Sampler.mkStandard
   pBraceClose
   return sampler
 
@@ -322,4 +304,14 @@ pBraceClose = char '}' >> spaces
 
 spaces1 :: CharParser Context String
 spaces1 = many1 space
+
+randomizeFromContext :: Randomize.Randomize a -> CharParser Context a
+randomizeFromContext f = do
+  context <- getState
+  let (result, r') = Randomize.runRandomized f (randomState context)
+  updateState $ \c -> c { randomState = r' }
+  return result
+
+updateGlobals :: (Globals -> Globals) -> CharParser Context ()
+updateGlobals f = updateState $ \c -> c { globals = f (globals c) }
 
