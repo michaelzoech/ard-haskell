@@ -2,6 +2,7 @@ module ARD.Material
   ( Material(..)
   , ShadeInfo(..)
   , mkMatte
+  , mkNormal
   , mkPhong
   ) where
 
@@ -22,6 +23,15 @@ data ShadeInfo = ShadeInfo
 
 data Material
   = Material ShadeFunc
+
+mkNormal :: Material
+mkNormal = Material shade
+  where
+    shade renderContext si lights ambientLight shadowTests =
+      let
+        Vector3 x y z = abs $ shadeNormal si
+      in
+        C.RGB x y z
 
 mkMatte :: C.Color -> Double -> Double -> Material
 mkMatte cd kd ka = Material shade

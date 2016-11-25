@@ -218,9 +218,10 @@ pMaterial = pReference globalMaterials <|> pMaterialBlock
 pMaterialBlock :: CharParser Context Material.Material
 pMaterialBlock = do
   try pBraceOpen
-  mtype <- try (pSymbol "matte") <|> try (pSymbol "phong")
+  mtype <- try (pSymbol "matte") <|> try (pSymbol "normal") <|> try (pSymbol "phong")
   material <- case mtype of
     "matte" -> Material.mkMatte <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble
+    "normal" -> return Material.mkNormal
     "phong" -> Material.mkPhong <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble <*> pField "ks" pDouble <*> pField "exp" pDouble
   pBraceClose
   return material
