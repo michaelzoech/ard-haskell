@@ -2,6 +2,7 @@ module ARD.Plane where
 
 import qualified ARD.Geometric as G
 import ARD.Material
+import qualified ARD.Math as Math
 import ARD.Ray as Ray
 import ARD.Vector
 
@@ -12,8 +13,6 @@ data Plane
   , material :: Material
   }
 
-kEpsilon = 1.0e-8
-
 instance G.GeometricObject Plane where
   hit plane ray =
     let p = point plane
@@ -21,7 +20,7 @@ instance G.GeometricObject Plane where
         o = Ray.origin ray
         d = Ray.direction ray
         t = (p - o) `dot` n / (d `dot` n)
-    in if t > kEpsilon
+    in if t > Math.epsilon
          then Just G.HitResult
            { G.tmin = t
            , G.shadeRecord = G.ShadeRecord
@@ -39,5 +38,5 @@ instance G.GeometricObject Plane where
         d = Ray.direction ray
         t = (p - o) `dot` n / (d `dot` n)
     in
-      if t > kEpsilon then Just t else Nothing
+      if t > Math.epsilon then Just t else Nothing
 

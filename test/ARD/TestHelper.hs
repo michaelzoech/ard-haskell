@@ -58,12 +58,15 @@ actual `shouldBeClose` expected = expectTrue ("expected: " ++ show expected ++ "
 hasHitPoint :: (G.GeometricObject a) => a -> Ray.Ray -> V.Point3 -> Expectation
 hasHitPoint obj ray hitPoint =
   case G.hit obj ray of
-    Just hitResult ->
-      let
-        shadeRec = G.shadeRecord hitResult
-      in
-        G.localHitPoint shadeRec `shouldBe` hitPoint
+    Just hitResult -> G.localHitPoint (G.shadeRecord hitResult) `shouldBe` hitPoint
     _ -> expectationFailure "No hit point found"
+
+hasNoHitPoint :: (G.GeometricObject a) => a -> Ray.Ray -> Expectation
+hasNoHitPoint obj ray =
+  case G.hit obj ray of
+    Just hitResult ->
+      expectationFailure ("Expected no hit point but got " ++ show (G.localHitPoint $ G.shadeRecord hitResult))
+    _ -> return ()
 
 dummyMaterial :: Material.Material
 dummyMaterial = Material.mkMatte (C.RGB 1 1 1) 1 0

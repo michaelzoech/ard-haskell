@@ -1,6 +1,8 @@
 module ARD.Matrix where
 
 import ARD.Vector
+import qualified ARD.Math as Math
+
 import qualified Data.Vector.Unboxed as UV
 
 newtype Matrix = Matrix { mat :: UV.Vector Double }
@@ -22,8 +24,8 @@ translate (Vector3 x y z) =
 rotateX :: Double -> Matrix
 rotateX deg =
   let
-    sinr = sin (radians deg)
-    cosr = cos (radians deg)
+    sinr = sin (Math.radians deg)
+    cosr = cos (Math.radians deg)
   in
     matrix
       1    0       0 0
@@ -34,8 +36,8 @@ rotateX deg =
 rotateY :: Double -> Matrix
 rotateY deg =
   let
-    sinr = sin (radians deg)
-    cosr = cos (radians deg)
+    sinr = sin (Math.radians deg)
+    cosr = cos (Math.radians deg)
   in
     matrix
          cosr 0 sinr 0
@@ -46,8 +48,8 @@ rotateY deg =
 rotateZ :: Double -> Matrix
 rotateZ deg =
   let
-    sinr = sin (radians deg)
-    cosr = cos (radians deg)
+    sinr = sin (Math.radians deg)
+    cosr = cos (Math.radians deg)
   in
     matrix
       cosr (-sinr) 0 0
@@ -113,10 +115,4 @@ transformPoint m (Vector3 x y z) = Vector3 x' y' z'
     vw = mi m 3 0 * x + mi m 3 1 * y + mi m 3 2 * z + mi m 3 3
     oneByW = 1.0 / vw
     (x', y', z') = (vx/oneByW, vy/oneByW, vz/oneByW)
-
-radians :: Double -> Double
-radians deg = deg * (pi / 180.0)
-
-degrees :: Double -> Double
-degrees rads = rads * (180.0 / pi)
 

@@ -1,5 +1,6 @@
 import Test.Hspec
 
+import qualified ARD.BoxSpec
 import qualified ARD.CameraSpec
 import qualified ARD.ColorSpec
 import qualified ARD.MatrixSpec
@@ -11,6 +12,7 @@ import qualified ARD.VectorSpec
 
 main :: IO ()
 main = hspec $ do
+  ARD.BoxSpec.spec
   ARD.CameraSpec.spec
   ARD.ColorSpec.spec
   ARD.MatrixSpec.spec

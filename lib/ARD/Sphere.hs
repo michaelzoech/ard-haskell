@@ -2,6 +2,7 @@ module ARD.Sphere where
 
 import qualified ARD.Geometric as G
 import ARD.Material
+import qualified ARD.Math as Math
 import qualified ARD.Ray as Ray
 import ARD.Vector
 
@@ -54,9 +55,9 @@ instance G.GeometricObject Sphere where
           t = (-b - e) / denom
           t' = (-b + e) / denom
         in
-          if t > 1.0e-8 then
+          if t > Math.epsilon then
             Just t
-          else if t' > 1.0e-8 then
+          else if t' > Math.epsilon then
             Just t'
           else
             Nothing

@@ -5,11 +5,13 @@ module ARD.Parser
   , parseWorld
   ) where
 
+import qualified ARD.Box as Box
 import qualified ARD.Camera as Camera
 import qualified ARD.Color as Color
 import qualified ARD.Geometric as Geometric
 import qualified ARD.Light as Light
 import qualified ARD.Material as Material
+import qualified ARD.Matrix as Matrix
 import qualified ARD.Plane as Plane
 import qualified ARD.Randomize as Randomize
 import qualified ARD.Sampler as Sampler
@@ -93,7 +95,7 @@ parseScene sourceName input =
 pScene :: CharParser Context Context
 pScene = do
   spaces
-  manyTill ((pComment <|> pLet <|> pCamera <|> pViewPlane <|> pLight <|> pPlane <|> pSphere <|> pBackgroundColor <|> pRandom <|> pAmbientLight) <* spaces) (try eof)
+  manyTill ((pComment <|> pLet <|> pCamera <|> pViewPlane <|> pLight <|> pPlane <|> pSphere <|> pBox <|> pBackgroundColor <|> pRandom <|> pAmbientLight) <* spaces) (try eof)
   getState
 
 pLet :: CharParser Context ()
@@ -211,6 +213,29 @@ pPlane = do
       , Plane.material = material
       }
   updateState $ \c -> c { sceneObjects = sceneObjects c ++ [plane] }
+
+pBox :: CharParser Context ()
+pBox = do
+  try $ pSymbol "box"
+  pBraceOpen
+  center <- pField "center" pVector3
+  Vector.Vector3 sx sy sz <- pField "size" pVector3
+  Vector.Vector3 rx ry rz <- pField "rotation" pVector3
+  material <- pField "material" pMaterial
+  pBraceClose
+  let
+    m = Matrix.rotateX rx `Matrix.mul` Matrix.rotateY ry `Matrix.mul` Matrix.rotateZ rz
+    vu = m `Matrix.transformVector` Vector.Vector3 (0.5*sx) 0 0
+    vv = m `Matrix.transformVector` Vector.Vector3 0 (0.5*sy) 0
+    vw = m `Matrix.transformVector` Vector.Vector3 0 0 (0.5*sz)
+    box = World.SceneObject Box.Box
+      { Box.center = center
+      , Box.vu = vu
+      , Box.vv = vv
+      , Box.vw = vw
+      , Box.material = material
+      }
+  updateState $ \c -> c { sceneObjects = sceneObjects c ++ [box] }
 
 pMaterial :: CharParser Context Material.Material
 pMaterial = pReference globalMaterials <|> pMaterialBlock
