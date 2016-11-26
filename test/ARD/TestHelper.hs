@@ -6,24 +6,24 @@ import qualified ARD.Color as C
 import qualified ARD.Geometric as G
 import qualified ARD.Material as Material
 import qualified ARD.Ray as Ray
-import qualified ARD.Vector as Vector
+import qualified ARD.Vector as V
 
 import Control.Monad (unless)
 import Test.QuickCheck
 import Test.Hspec
 
-instance Arbitrary Vector.Vector2 where
+instance Arbitrary V.Vector2 where
   arbitrary = do
     x <- arbitrary
     y <- arbitrary
-    return $ Vector.Vector2 x y
+    return $ V.Vector2 x y
 
-instance Arbitrary Vector.Vector3 where
+instance Arbitrary V.Vector3 where
   arbitrary = do
     x <- arbitrary
     y <- arbitrary
     z <- arbitrary
-    return $ Vector.Vector3 x y z
+    return $ V.Vector3 x y z
 
 instance Arbitrary C.Color where
   arbitrary = do
@@ -44,6 +44,9 @@ instance TolerantEqual Double where
 instance TolerantEqual C.Color where
   (=~) (C.RGB r g b) (C.RGB r' g' b') = (r =~ r') && (g =~ g') && (b =~ b')
 
+instance TolerantEqual V.Vector3 where
+  (=~) (V.Vector3 x y z) (V.Vector3 x' y' z') = (x =~ x') && (y =~ y') && (z =~ z')
+
 expectTrue :: String -> Bool -> Expectation
 expectTrue message actual = unless actual (expectationFailure message)
 
@@ -52,7 +55,7 @@ expectTrue message actual = unless actual (expectationFailure message)
 shouldBeClose :: (Show a, TolerantEqual a) => a -> a -> Expectation
 actual `shouldBeClose` expected = expectTrue ("expected: " ++ show expected ++ "\n but got: " ++ show actual) (actual =~ expected)
 
-hasHitPoint :: (G.GeometricObject a) => a -> Ray.Ray -> Vector.Point3 -> Expectation
+hasHitPoint :: (G.GeometricObject a) => a -> Ray.Ray -> V.Point3 -> Expectation
 hasHitPoint obj ray hitPoint =
   case G.hit obj ray of
     Just hitResult ->
