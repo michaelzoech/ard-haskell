@@ -6,8 +6,9 @@ The implementation is based on the book "Ray Tracing from the Group Up" by Kevin
 ## Features
 
 * Geometric Objects
-  * Sphere
+  * Box
   * Plane
+  * Sphere
 * Lights
   * Ambient
   * Ambient Occlusion
