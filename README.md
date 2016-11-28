@@ -1,5 +1,8 @@
 # ARD
 
+[![GitHub License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/crazymaik/ard-haskell/master/LICENSE.txt)
+[![Build Status](https://travis-ci.org/crazymaik/ard-haskell.svg?branch=master)](https://travis-ci.org/crazymaik/ard-haskell)
+
 A simple ray tracer written in Haskell.
 The implementation is based on the book "Ray Tracing from the Group Up" by Kevin Suffern.
 
