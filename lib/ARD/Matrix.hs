@@ -114,5 +114,5 @@ transformPoint m (Vector3 x y z) = Vector3 x' y' z'
     vz = mi m 2 0 * x + mi m 2 1 * y + mi m 2 2 * z + mi m 2 3
     vw = mi m 3 0 * x + mi m 3 1 * y + mi m 3 2 * z + mi m 3 3
     oneByW = 1.0 / vw
-    (x', y', z') = (vx/oneByW, vy/oneByW, vz/oneByW)
+    (x', y', z') = (vx*oneByW, vy*oneByW, vz*oneByW)
 
