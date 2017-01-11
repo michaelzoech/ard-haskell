@@ -29,6 +29,12 @@ The implementation is based on the book "Ray Tracing from the Group Up" by Kevin
 * Scene definition in file
 * Parallelization of pixel tracing
 
+## Examples
+
+![Ambient Occlusion](/samples/ambient_occlusion.png)
+
+![Simple](/samples/simple.png)
+
 ## License
 
     Copyright (c) 2016 Michael Zoech

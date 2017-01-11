@@ -3,7 +3,7 @@
 camera {
   pinhole
   eye -15 15 33
-  lookAt 0 0 3
+  lookAt 0 0 2
   up 0 1 0
   distance 100
 }
@@ -48,7 +48,7 @@ plane {
     matte
     cd 1 1 1
     kd 1
-    ka 0.3
+    ka 0.7
   }
 }
 
