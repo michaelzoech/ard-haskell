@@ -36,8 +36,8 @@ mkNormal = Material shade
 mkMatte :: C.Color -> Double -> Double -> Material
 mkMatte cd kd ka = Material shade
   where
-    ambient = BRDF.mkLambertian cd ka
-    diffuse = BRDF.mkLambertian cd kd
+    ambient = BRDF.Lambertian cd ka
+    diffuse = BRDF.Lambertian cd kd
     shade renderContext si lights ambientLight shadowTests =
       let
         wo = -(Ray.direction $ shadeOutgoingRay si)
@@ -60,9 +60,9 @@ mkMatte cd kd ka = Material shade
 mkPhong :: C.Color -> Double -> Double -> Double -> Double -> Material
 mkPhong cd kd ka ks exp = Material shade
   where
-    ambient = BRDF.mkLambertian cd ka
-    diffuse = BRDF.mkLambertian cd kd
-    specular = BRDF.mkGlossySpecular ks exp
+    ambient = BRDF.Lambertian cd ka
+    diffuse = BRDF.Lambertian cd kd
+    specular = BRDF.GlossySpecular ks exp
     shade renderContext si lights ambientLight shadowTests =
       let
         wo = -(Ray.direction $ shadeOutgoingRay si)

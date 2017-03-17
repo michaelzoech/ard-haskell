@@ -1,44 +1,30 @@
 module ARD.BRDF
   ( BRDF(..)
-  , mkGlossySpecular
-  , mkLambertian
-  , ShadeFunc
-  , RhoFunc
+  , rho
+  , shade
   ) where
 
 import qualified ARD.Color as C
 import ARD.Vector
 
--- | Calculates the reflected radiance of an incoming direction to a reflected direction.
--- Input: Surface normal -> Incoming direction -> Reflected direction
-type ShadeFunc = (Vector3 -> Vector3 -> Vector3 -> C.Color)
-
-type RhoFunc = (Vector3 -> C.Color)
-
 -- | Bidirectional reflectance distribution function.
 -- Describes how light is reflected at a surface.
 data BRDF
-  = BRDF {
-    shade :: ShadeFunc
-  , rho :: RhoFunc
-  }
+  = Lambertian !C.Color !Double
+  | GlossySpecular !Double !Double
 
-mkLambertian :: C.Color -> Double -> BRDF
-mkLambertian cd kd = BRDF shade rho
+-- | Calculates the reflected radiance of an incoming direction to a reflected direction.
+-- Input: Surface normal -> Incoming direction -> Reflected direction
+shade :: BRDF -> Vector3 -> Vector3 -> Vector3 -> C.Color
+shade (Lambertian diffuse kd) _ _ _ = diffuse `C.mul` (kd * (1 / pi))
+shade (GlossySpecular ks exp) n wi wo = C.RGB rad rad rad
   where
-    shade n wi wo = cd `C.mul` (kd * (1 / pi))
-    rho wo = cd `C.mul` kd
+    ndotwi = n `dot` wi
+    r = (-wi) + n `mul` (2 * ndotwi)
+    rdotwo = r `dot` wo
+    rad = if rdotwo > 0 then ks * (rdotwo ** exp) else 0
 
-mkGlossySpecular :: Double -> Double -> BRDF
-mkGlossySpecular ks exp = BRDF shade rho
-  where
-    shade n wi wo =
-      let
-        ndotwi = n `dot` wi
-        r = (-wi) + n `mul` (2 * ndotwi)
-        rdotwo = r `dot` wo
-        rad = if rdotwo > 0 then ks * (rdotwo ** exp) else 0
-      in
-        C.RGB rad rad rad
-    rho wo = C.RGB 0 0 0
+rho :: BRDF -> Vector3 -> C.Color
+rho (Lambertian diffuse kd) _ = diffuse `C.mul` kd
+rho (GlossySpecular _ _) _ = C.RGB 0 0 0
 
