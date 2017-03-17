@@ -254,10 +254,10 @@ pLight = do
 pLightBlock :: SceneParser Light.Light
 pLightBlock = pBlock $
   pString >>= \s -> case s of
-    "ambient" -> Light.mkAmbient <$> pField "color" pColor <*> pField "ls" pDouble
-    "ambientOccluder" -> Light.mkAmbientOccluder <$> pField "color" pColor <*> pField "ls" pDouble <*> pField "minColor" pColor <*> pField "sampler" pSampler
-    "directional" -> Light.mkDirectional <$> pField "invertDirection" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
-    "point" -> Light.mkPoint <$> pField "location" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
+    "ambient" -> Light.Ambient <$> pField "color" pColor <*> pField "ls" pDouble
+    "ambientOccluder" -> Light.AmbientOccluder <$> pField "color" pColor <*> pField "ls" pDouble <*> pField "minColor" pColor <*> pField "sampler" pSampler
+    "directional" -> Light.Directional <$> pField "invertDirection" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
+    "point" -> Light.Point <$> pField "location" pVector3 <*> pField "color" pColor <*> pField "ls" pDouble
     _ -> fail ("Unexpected light type " ++ s)
 
 pSampler :: SceneParser Sampler.Sampler
