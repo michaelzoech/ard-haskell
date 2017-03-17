@@ -240,9 +240,9 @@ pMaterial = pReference globalMaterials <|> pMaterialBlock
 pMaterialBlock :: SceneParser Material.Material
 pMaterialBlock = pBlock $
   pString >>= \s -> case s of
-    "matte" -> Material.mkMatte <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble
-    "normal" -> return Material.mkNormal
-    "phong" -> Material.mkPhong <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble <*> pField "ks" pDouble <*> pField "exp" pDouble
+    "matte" -> Material.Matte <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble
+    "normal" -> return Material.Normal
+    "phong" -> Material.Phong <$> pField "cd" pColor <*> pField "kd" pDouble <*> pField "ka" pDouble <*> pField "ks" pDouble <*> pField "exp" pDouble
     _ -> fail ("Unexpected material type " ++ s)
 
 pLight :: SceneParser ()

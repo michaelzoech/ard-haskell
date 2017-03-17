@@ -69,5 +69,5 @@ hasNoHitPoint obj ray =
     _ -> return ()
 
 dummyMaterial :: Material.Material
-dummyMaterial = Material.mkMatte (C.RGB 1 1 1) 1 0
+dummyMaterial = Material.Matte (C.RGB 1 1 1) 1 0
 

@@ -5,7 +5,7 @@ module ARD.Tracer
 import ARD.Camera
 import ARD.Color
 import ARD.Geometric as G
-import ARD.Material
+import ARD.Material as Material
 import ARD.Randomize
 import ARD.Rendering
 import ARD.Ray
@@ -73,10 +73,10 @@ traceRay world (ray, renderContext)
   | null hits = backgroundColor world
   | otherwise =
     let
-      (Material shadeFunc) = (G.material $ G.shadeRecord nearestHit)
+      material = (G.material $ G.shadeRecord nearestHit)
       shadowTests = map shadowHit (sceneObjects world)
     in
-      shadeFunc renderContext (shadeRecordToShadeInfo $ G.shadeRecord nearestHit) (lights world) (ambientLight world) shadowTests
+      Material.shade material renderContext (shadeRecordToShadeInfo $ G.shadeRecord nearestHit) (lights world) (ambientLight world) shadowTests
   where
     objects = sceneObjects world
     hits = mapMaybe (`hit` ray) objects
