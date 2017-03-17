@@ -5,17 +5,14 @@ module ARD.Parser
   , parseWorld
   ) where
 
-import qualified ARD.Box as Box
 import qualified ARD.Camera as Camera
 import qualified ARD.Color as Color
-import qualified ARD.Geometric as Geometric
 import qualified ARD.Light as Light
 import qualified ARD.Material as Material
 import qualified ARD.Matrix as Matrix
-import qualified ARD.Plane as Plane
 import qualified ARD.Randomize as Randomize
 import qualified ARD.Sampler as Sampler
-import qualified ARD.Sphere as Sphere
+import qualified ARD.Shape as Shape
 import qualified ARD.Vector as Vector
 import qualified ARD.ViewPlane as ViewPlane
 import qualified ARD.World as World
@@ -43,7 +40,7 @@ data Context
   { randomState :: Randomize.Random
   , camera :: Maybe Camera.Camera
   , viewPlane :: Maybe ViewPlane.ViewPlane
-  , sceneObjects :: [World.SceneObject]
+  , sceneObjects :: [Shape.Shape]
   , lights :: [Light.Light]
   , ambientLight :: Maybe Light.Light
   , backgroundColor :: Maybe Color.Color
@@ -190,11 +187,7 @@ pSphere = do
     radius <- pField "radius" pDouble
     material <- pField "material" pMaterial
     let
-      sphere = World.SceneObject Sphere.Sphere
-        { Sphere.center = center
-        , Sphere.radius = radius
-        , Sphere.material = material
-        }
+      sphere = Shape.Sphere center radius material
     updateState $ \c -> c { sceneObjects = sceneObjects c ++ [sphere] }
 
 pPlane :: SceneParser ()
@@ -205,11 +198,7 @@ pPlane = do
     normal <- pField "normal" pVector3
     material <- pField "material" pMaterial
     let
-      plane = World.SceneObject Plane.Plane
-        { Plane.point = point
-        , Plane.normal = normal
-        , Plane.material = material
-        }
+      plane = Shape.Plane point normal material
     updateState $ \c -> c { sceneObjects = sceneObjects c ++ [plane] }
 
 pBox :: SceneParser ()
@@ -225,13 +214,7 @@ pBox = do
       vu = m `Matrix.transformVector` Vector.Vector3 (0.5*sx) 0 0
       vv = m `Matrix.transformVector` Vector.Vector3 0 (0.5*sy) 0
       vw = m `Matrix.transformVector` Vector.Vector3 0 0 (0.5*sz)
-      box = World.SceneObject Box.Box
-        { Box.center = center
-        , Box.vu = vu
-        , Box.vv = vv
-        , Box.vw = vw
-        , Box.material = material
-        }
+      box = Shape.Box center vu vv vw material
     updateState $ \c -> c { sceneObjects = sceneObjects c ++ [box] }
 
 pMaterial :: SceneParser Material.Material

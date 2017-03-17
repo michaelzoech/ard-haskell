@@ -3,9 +3,9 @@
 module ARD.TestHelper where
 
 import qualified ARD.Color as C
-import qualified ARD.Geometric as G
 import qualified ARD.Material as Material
 import qualified ARD.Ray as Ray
+import qualified ARD.Shape as Shape
 import qualified ARD.Vector as V
 
 import Control.Monad (unless)
@@ -55,17 +55,17 @@ expectTrue message actual = unless actual (expectationFailure message)
 shouldBeClose :: (Show a, TolerantEqual a) => a -> a -> Expectation
 actual `shouldBeClose` expected = expectTrue ("expected: " ++ show expected ++ "\n but got: " ++ show actual) (actual =~ expected)
 
-hasHitPoint :: (G.GeometricObject a) => a -> Ray.Ray -> V.Point3 -> Expectation
-hasHitPoint obj ray hitPoint =
-  case G.hit obj ray of
-    Just hitResult -> G.localHitPoint (G.shadeRecord hitResult) `shouldBe` hitPoint
+hasHitPoint :: Shape.Shape -> Ray.Ray -> V.Point3 -> Expectation
+hasHitPoint shape ray hitPoint =
+  case Shape.hit shape ray of
+    Just hitResult -> Shape.localHitPoint (Shape.shadeRecord hitResult) `shouldBe` hitPoint
     _ -> expectationFailure "No hit point found"
 
-hasNoHitPoint :: (G.GeometricObject a) => a -> Ray.Ray -> Expectation
-hasNoHitPoint obj ray =
-  case G.hit obj ray of
+hasNoHitPoint :: Shape.Shape -> Ray.Ray -> Expectation
+hasNoHitPoint shape ray =
+  case Shape.hit shape ray of
     Just hitResult ->
-      expectationFailure ("Expected no hit point but got " ++ show (G.localHitPoint $ G.shadeRecord hitResult))
+      expectationFailure ("Expected no hit point but got " ++ show (Shape.localHitPoint $ Shape.shadeRecord hitResult))
     _ -> return ()
 
 dummyMaterial :: Material.Material

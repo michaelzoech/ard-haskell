@@ -4,12 +4,12 @@ module ARD.Tracer
 
 import ARD.Camera
 import ARD.Color
-import ARD.Geometric as G
 import ARD.Material as Material
 import ARD.Randomize
 import ARD.Rendering
 import ARD.Ray
 import ARD.Sampler
+import ARD.Shape as Shape
 import ARD.Vector as Vector
 import ARD.ViewPlane
 import ARD.World
@@ -73,19 +73,19 @@ traceRay world (ray, renderContext)
   | null hits = backgroundColor world
   | otherwise =
     let
-      material = (G.material $ G.shadeRecord nearestHit)
+      material = (Shape.material $ Shape.shadeRecord nearestHit)
       shadowTests = map shadowHit (sceneObjects world)
     in
-      Material.shade material renderContext (shadeRecordToShadeInfo $ G.shadeRecord nearestHit) (lights world) (ambientLight world) shadowTests
+      Material.shade material renderContext (shadeRecordToShadeInfo $ Shape.shadeRecord nearestHit) (lights world) (ambientLight world) shadowTests
   where
     objects = sceneObjects world
     hits = mapMaybe (`hit` ray) objects
-    nearestHit = minimumBy (\a b ->G.tmin a `compare` G.tmin b) hits
+    nearestHit = minimumBy (\a b ->Shape.tmin a `compare` Shape.tmin b) hits
 
-shadeRecordToShadeInfo :: G.ShadeRecord -> ShadeInfo
+shadeRecordToShadeInfo :: Shape.ShadeRecord -> ShadeInfo
 shadeRecordToShadeInfo sr =
   ShadeInfo
-    { shadePoint = G.localHitPoint sr
-    , shadeNormal = G.normal sr
-    , shadeOutgoingRay = G.ray sr
+    { shadePoint = Shape.localHitPoint sr
+    , shadeNormal = Shape.normal sr
+    , shadeOutgoingRay = Shape.ray sr
     }
