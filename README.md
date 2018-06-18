@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/crazymaik/ard-haskell.svg?branch=master)](https://travis-ci.org/crazymaik/ard-haskell)
 
 A simple ray tracer written in Haskell.
-The implementation is based on the book "Ray Tracing from the Group Up" by Kevin Suffern.
+The implementation is based on the book "Ray Tracing from the Ground Up" by Kevin Suffern.
 
 ## Features
 
